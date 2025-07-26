@@ -19,8 +19,7 @@ import SkinProfileScreen from "./components/Home_Screen/Phase1_SkinProfile/SkinP
 import ScanFaceScreen from "./components/Home_Screen/Phase2_ScanFace/ScanFaceScreen";
 import ScanFaceImageScreen from "./components/Home_Screen/Phase3_ScanFace/ScanFaceImageScreen";
 
-// Import custom tab bar
-import CustomTabBar from "./components/UI_Common/CustomTabBar";
+import Colors from "./constants/colors";
 
 // Create navigators
 const Tab = createBottomTabNavigator();
@@ -35,10 +34,26 @@ function HomeStackNavigator() {
         animation: "slide_from_right",
       }}
     >
-      <Stack.Screen name="MainHome" component={HomeScreen} />
-      <Stack.Screen name="SkinProfile" component={SkinProfileScreen} />
-      <Stack.Screen name="ScanFace" component={ScanFaceScreen} />
-      <Stack.Screen name="ScanFaceImage" component={ScanFaceImageScreen} />
+      <Stack.Screen
+        name="MainHome"
+        component={HomeScreen}
+        options={{ title: "Seraface" }}
+      />
+      <Stack.Screen
+        name="SkinProfile"
+        component={SkinProfileScreen}
+        options={{ title: "Skin Profile" }}
+      />
+      <Stack.Screen
+        name="ScanFace"
+        component={ScanFaceScreen}
+        options={{ title: "Scan Face" }}
+      />
+      {/* <Stack.Screen
+        name="ScanFaceImage"
+        component={ScanFaceImageScreen}
+        options={{ title: "Skin Profile" }}
+      /> */}
     </Stack.Navigator>
   );
 }
@@ -47,20 +62,34 @@ function HomeStackNavigator() {
 export default function App() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="light" />
       <NavigationContainer>
         <Tab.Navigator
-          tabBar={(props) => <CustomTabBar {...props} />}
-          screenOptions={{
-            headerShown: false,
-          }}
+          // tabBar={(props) => <CustomTabBar {...props} />}
+          screenOptions={{}}
         >
-          <Tab.Screen name="Home" component={HomeStackNavigator} />
-          <Tab.Screen name="Products" component={ProductsScreen} />
-          <Tab.Screen name="Routine" component={RoutinesScreen} />
-          <Tab.Screen name="Budget" component={BudgetScreen} />
+          <Tab.Screen
+            name="Home"
+            component={HomeStackNavigator}
+            options={{ title: "Home" }}
+          />
+          <Tab.Screen
+            name="Products"
+            component={ProductsScreen}
+            options={{ title: "Recommendations" }}
+          />
+          <Tab.Screen
+            name="Routine"
+            component={RoutinesScreen}
+            options={{ title: "Your Routine" }}
+          />
+          <Tab.Screen
+            name="Budget"
+            component={BudgetScreen}
+            options={{ title: "Budget Planner" }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
-      <StatusBar style="auto" />
     </SafeAreaProvider>
   );
 }
