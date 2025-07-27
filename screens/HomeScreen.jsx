@@ -6,6 +6,7 @@ import {
 } from "@expo/vector-icons";
 import NextButton from "../components/UI_Common/Buttons/NextButton";
 import InfoContainer from "../components/Home_Screen/Main_Home/InfoContainer";
+import { GradientText } from "../components/UI_Common/Gradients/GradientText";
 
 const infoData = [
   {
@@ -37,7 +38,7 @@ export default function HomeScreen() {
         <Ionicons name="" />
       </View>
       <View>
-        <Text>Seraface AI</Text>
+        <GradientText text={"Seraface AI"} size={24} preset={"purpleToPink"} />
         <Text>Your AI-powered skincare companion</Text>
       </View>
       <FlatList
@@ -55,36 +56,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-// // Example snippet for Home_Screen.jsx
-// import { useNavigation } from "@react-navigation/native";
-// import { View, TouchableOpacity, Text } from "react-native";
-// import { GradientView } from "../components/GradientView";
-
-// export default function HomeScreen() {
-//   const navigation = useNavigation();
-
-//   // Navigate to the first step
-//   const handleGetStarted = () => {
-//     navigation.navigate("SkinProfile");
-//   };
-
-//   return (
-//     <View className="flex-1 bg-background">
-//       {/* Existing home screen content */}
-
-//       {/* Get Started button */}
-//       <GradientView
-//         preset="primaryButton"
-//         className="rounded-full py-3 px-6 mx-4 mb-6 items-center"
-//       >
-//         <TouchableOpacity
-//           onPress={handleGetStarted}
-//           className="w-full items-center"
-//         >
-//           <Text className="text-textLight font-bold">Get Started</Text>
-//         </TouchableOpacity>
-//       </GradientView>
-//     </View>
-//   );
-// }

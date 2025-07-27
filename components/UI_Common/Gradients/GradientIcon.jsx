@@ -17,7 +17,7 @@ export const GradientIcon = ({
     <MaskedView
       style={[{ width: size, height: size }, style]}
       maskElement={
-        <View style={{ backgroundColor: "transparent" }}>
+        <View className="bg-transparent">
           <Ionicons name={name} size={size} color="white" />
         </View>
       }

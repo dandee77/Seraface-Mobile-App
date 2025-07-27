@@ -1,11 +1,10 @@
-import React from "react";
 import { View } from "react-native";
 import { GradientText } from "../Gradients/GradientText";
 import { GradientIcon } from "../Gradients/GradientIcon";
 
 export const GradientHeaderTitle = ({ title, iconName }) => {
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View className="flex-row items-center">
       {iconName && (
         <GradientIcon
           name={iconName}

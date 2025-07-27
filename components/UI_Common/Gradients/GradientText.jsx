@@ -1,7 +1,7 @@
 import React from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
-import { GradientView } from "../Gradients/GradientView";
+import { GradientView } from "./GradientView";
 
 export const GradientText = ({
   text,
@@ -12,29 +12,35 @@ export const GradientText = ({
   size = 14,
 }) => {
   const gradientPreset = preset || (focused ? "purpleToPink" : "lightPurple");
+  const estimatedWidth = Math.max(text.length * size * 0.7, 40);
+
+  const viewHeight = size * 1.5;
 
   return (
-    <MaskedView
-      style={{ flexShrink: 1 }}
-      maskElement={
-        <Text
-          style={[
-            {
-              fontWeight: "bold",
-            },
-            style,
-            { fontSize: size },
-          ]}
-        >
-          {text}
-        </Text>
-      }
+    <View
+      className="items-center justify-center"
+      style={{ height: viewHeight, minWidth: estimatedWidth }}
     >
-      <GradientView
-        preset={gradientPreset}
-        direction={direction}
-        className="flex-1"
-      />
-    </MaskedView>
+      <MaskedView
+        style={{ height: viewHeight, minWidth: estimatedWidth }}
+        maskElement={
+          <View className="flex-1 bg-transparent items-center justify-center">
+            <Text
+              className="font-bold text-center"
+              style={[{ fontSize: size, paddingTop: 2 }, style]}
+              numberOfLines={1}
+            >
+              {text}
+            </Text>
+          </View>
+        }
+      >
+        <GradientView
+          preset={gradientPreset}
+          direction={direction}
+          className="flex-1"
+        />
+      </MaskedView>
+    </View>
   );
 };

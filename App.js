@@ -8,7 +8,6 @@ import { GradientIcon } from "./components/UI_Common/Gradients/GradientIcon";
 import { GradientText } from "./components/UI_Common/Gradients/GradientText";
 import { GradientHeaderTitle } from "./components/UI_Common/Gradients/GradientHeaderTitle";
 
-// Import screens
 import HomeScreen from "./screens/HomeScreen";
 import ProductsScreen from "./screens/ProductsScreen";
 import RoutinesScreen from "./screens/RoutinesScreen";
@@ -16,6 +15,10 @@ import BudgetScreen from "./screens/BudgetScreen";
 
 import SkinProfileScreen from "./components/Home_Screen/Phase1_SkinProfile/SkinProfileScreen";
 import ScanFaceScreen from "./components/Home_Screen/Phase2_ScanFace/ScanFaceScreen";
+import Colors from "./constants/colors";
+import { Pressable, View } from "react-native";
+import { GradientView } from "./components/UI_Common/Gradients/GradientView";
+import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -47,44 +50,81 @@ function HomeStackNavigator() {
   );
 }
 
-// Main App with Bottom Tab Navigation
 export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
       <NavigationContainer>
-        <Tab.Navigator>
+        <Tab.Navigator
+          screenOptions={{
+            tabBarStyle: {
+              backgroundColor: Colors.background,
+              height: 67,
+              paddingTop: 6,
+            },
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{
+                  color: Colors.primary100,
+                  borderless: true,
+                }}
+                // style={{paddingTop: 6}}
+              />
+            ),
+          }}
+        >
           <Tab.Screen
             name="Home"
             component={HomeStackNavigator}
             options={{
-              tabBarLabel: ({ focused }) => (
-                <GradientText
-                  text={"Home"}
-                  focused={focused}
-                  style={{ fontSize: 12 }}
-                />
-              ),
               title: "SerafaceAI",
               tabBarIcon: ({ focused }) => (
-                <GradientIcon name={"home"} size={24} focused={focused} />
+                <GradientIcon name={"home"} size={28} focused={focused} />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <TabBarLabel text={"Home"} focused={focused} />
               ),
             }}
           />
           <Tab.Screen
             name="Products"
             component={ProductsScreen}
-            options={{ tabBarLabel: "Products", title: "Recommendations" }}
+            options={{
+              title: "Recommendations",
+              tabBarIcon: ({ focused }) => (
+                <GradientIcon name={"cube"} size={28} focused={focused} />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <TabBarLabel text={"Products"} focused={focused} />
+              ),
+            }}
           />
           <Tab.Screen
             name="Routine"
             component={RoutinesScreen}
-            options={{ tabBarLabel: "Routine", title: "Your Routine" }}
+            options={{
+              title: "Your Routine",
+              tabBarIcon: ({ focused }) => (
+                <GradientIcon name={"time"} size={28} focused={focused} />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <TabBarLabel text={"Routine"} focused={focused} />
+              ),
+            }}
           />
           <Tab.Screen
             name="Budget"
             component={BudgetScreen}
-            options={{ tabBarLabel: "Budget", title: "Budget Planner" }}
+            options={{
+              title: "Budget Planner",
+              tabBarIcon: ({ focused }) => (
+                <GradientIcon name={"wallet"} size={28} focused={focused} />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <TabBarLabel text={"Products"} focused={focused} />
+              ),
+            }}
           />
         </Tab.Navigator>
       </NavigationContainer>
