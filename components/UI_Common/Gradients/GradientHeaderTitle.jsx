@@ -2,22 +2,22 @@ import { View } from "react-native";
 import { GradientText } from "../Gradients/GradientText";
 import { GradientIcon } from "../Gradients/GradientIcon";
 
-export const GradientHeaderTitle = ({ title, iconName }) => {
+export const GradientHeaderTitle = ({
+  title,
+  iconName = "sparkles",
+  preset = "purpleToPink",
+}) => {
   return (
-    <View className="flex-row items-center">
+    <View className="flex-row items-center flex-1">
       {iconName && (
         <GradientIcon
           name={iconName}
-          size={24}
+          size={28}
           preset="purpleToPink"
-          style={{ marginRight: 8 }}
+          style={{ marginRight: 6 }}
         />
       )}
-      <GradientText
-        text={title}
-        preset="purpleToPink"
-        style={{ fontSize: 18 }}
-      />
+      <GradientText text={title} preset={preset} />
     </View>
   );
 };

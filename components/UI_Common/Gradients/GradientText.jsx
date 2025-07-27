@@ -9,26 +9,23 @@ export const GradientText = ({
   preset,
   direction = "leftToRight",
   focused = false,
-  size = 14,
+  numberOfLines,
+  adjustsFontSizeToFit = false,
 }) => {
   const gradientPreset = preset || (focused ? "purpleToPink" : "lightPurple");
-  const estimatedWidth = Math.max(text.length * size * 0.7, 40);
 
-  const viewHeight = size * 1.5;
+  const estimatedWidth = Math.max(text.length * 9, 40);
 
   return (
-    <View
-      className="items-center justify-center"
-      style={{ height: viewHeight, minWidth: estimatedWidth }}
-    >
+    <View style={{ height: 24, minWidth: 500 }}>
       <MaskedView
-        style={{ height: viewHeight, minWidth: estimatedWidth }}
+        style={{ height: 24, minWidth: 500 }}
         maskElement={
-          <View className="flex-1 bg-transparent items-center justify-center">
+          <View className="flex-1 bg-transparent ">
             <Text
-              className="font-bold text-center"
-              style={[{ fontSize: size, paddingTop: 2 }, style]}
-              numberOfLines={1}
+              className="font-bold"
+              style={[{ fontSize: 18 }, style]}
+              adjustsFontSizeToFit={adjustsFontSizeToFit}
             >
               {text}
             </Text>

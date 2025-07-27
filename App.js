@@ -62,6 +62,14 @@ export default function App() {
               height: 67,
               paddingTop: 6,
             },
+            headerStyle: {
+              backgroundColor: Colors.background,
+            },
+            headerTitleContainerStyle: {
+              flex: 1,
+              marginHorizontal: 16,
+              padding: 0,
+            },
             tabBarButton: (props) => (
               <Pressable
                 {...props}
@@ -69,16 +77,20 @@ export default function App() {
                   color: Colors.primary100,
                   borderless: true,
                 }}
-                // style={{paddingTop: 6}}
               />
             ),
+            headerTitleContainerStyle: {
+              flex: 1,
+              margin: 0,
+              padding: 0,
+            },
           }}
         >
           <Tab.Screen
             name="Home"
             component={HomeStackNavigator}
             options={{
-              title: "SerafaceAI",
+              headerTitle: () => <GradientHeaderTitle title={"SerafaceAI"} />,
               tabBarIcon: ({ focused }) => (
                 <GradientIcon name={"home"} size={28} focused={focused} />
               ),
@@ -91,7 +103,9 @@ export default function App() {
             name="Products"
             component={ProductsScreen}
             options={{
-              title: "Recommendations",
+              headerTitle: () => (
+                <GradientHeaderTitle title={"Recommendations"} />
+              ),
               tabBarIcon: ({ focused }) => (
                 <GradientIcon name={"cube"} size={28} focused={focused} />
               ),
@@ -104,7 +118,7 @@ export default function App() {
             name="Routine"
             component={RoutinesScreen}
             options={{
-              title: "Your Routine",
+              headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
               tabBarIcon: ({ focused }) => (
                 <GradientIcon name={"time"} size={28} focused={focused} />
               ),
@@ -117,7 +131,9 @@ export default function App() {
             name="Budget"
             component={BudgetScreen}
             options={{
-              title: "Budget Planner",
+              headerTitle: () => (
+                <GradientHeaderTitle title={"Budget Planner"} />
+              ),
               tabBarIcon: ({ focused }) => (
                 <GradientIcon name={"wallet"} size={28} focused={focused} />
               ),
