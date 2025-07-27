@@ -1,10 +1,10 @@
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Gradients, GradientDirections } from "../constants/gradients";
+import { Gradients, GradientDirections } from "../../../constants/gradients";
 
 export const GradientView = ({
   preset = "primaryButton",
-  direction = "diagonal",
+  direction = "leftToRight",
   children,
   style,
   className,
