@@ -61,7 +61,7 @@ function HomeStackNavigator() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <NavigationContainer theme={MyTheme}>
         <Tab.Navigator
           screenOptions={{
@@ -72,11 +72,7 @@ export default function App() {
             },
             headerStyle: {
               backgroundColor: Colors.background,
-            },
-            headerTitleContainerStyle: {
-              flex: 1,
-              marginHorizontal: 16,
-              padding: 0,
+              height: 80,
             },
             tabBarButton: (props) => (
               <Pressable

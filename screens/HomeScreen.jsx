@@ -18,23 +18,22 @@ import { useEffect } from "react";
 const infoData = [
   {
     id: 1,
-    icon: "clipboard",
+    icon: "clipboard-outline",
     title: "Personalized Recommendations",
     description:
       "Get product reccomendations based on your unique skin profile",
   },
   {
     id: 2,
-    icon: "camera",
+    icon: "camera-outline",
     title: "AI Skin Analysis",
     description: "Upload a selfie for advanced skin condition analysis",
   },
   {
     id: 3,
     icon: "color-wand-outline",
-    title: "Personalized Recommendations",
-    description:
-      "Get product reccomendations based on your unique skin profile",
+    title: "Custom Routines",
+    description: "Build the perfect skincare routine for your needs",
   },
 ];
 
@@ -44,7 +43,7 @@ export default function HomeScreen() {
   useEffect(() => {
     rotation.value = withRepeat(
       withTiming(360, {
-        duration: 12000,
+        duration: 10000,
         easing: Easing.linear,
       }),
       -1,

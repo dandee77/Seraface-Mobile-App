@@ -8,13 +8,13 @@ export const GradientHeaderTitle = ({
   preset = "purpleToPink",
 }) => {
   return (
-    <View className="flex-row items-center flex-1">
+    <View className="flex-row items-center  min-h-full">
       {iconName && (
         <GradientIcon
           name={iconName}
           size={28}
           preset="purpleToPink"
-          style={{ marginRight: 6 }}
+          style={{ marginRight: 8 }}
         />
       )}
       <GradientText text={title} preset={preset} />

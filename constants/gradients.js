@@ -39,6 +39,7 @@ export const Gradients = {
     Colors.accent200,
     Colors.accent50,
   ], // Brand gradient
+  purple: [Colors.primary600, Colors.primary500, Colors.primary400],
   lightPurple: [Colors.primary400, Colors.primary300, Colors.primary200], // Subtle purple
   lightPink: [Colors.accent200, Colors.accent400], // Subtle pink
   logoGradient: [Colors.logoStart, Colors.logoEnd],
