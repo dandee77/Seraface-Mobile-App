@@ -12,8 +12,10 @@ export const GradientText = ({
   numberOfLines,
   centerText = false,
 }) => {
-  const gradientPreset = preset || (focused ? "purpleToPink" : "lightPurple");
+  const gradientPreset =
+    preset || (focused ? (preset ? preset : "purpleToPink") : "lightPurple");
 
+  const fontSize = style?.fontSize || 18;
   const estimatedWidth = Math.max(text.length * 9, 40);
 
   const containerClasses = centerText
@@ -29,16 +31,16 @@ export const GradientText = ({
   return (
     <View
       className={containerClasses}
-      style={{ height: 24, width: estimatedWidth }}
+      style={{ height: fontSize * 1.5, width: estimatedWidth }}
     >
       <MaskedView
         className="overflow-hidden"
-        style={{ height: 24, width: estimatedWidth * 1.21 }}
+        style={{ height: fontSize * 1.5, width: estimatedWidth * 1.21 }}
         maskElement={
           <View className={textContainerClasses}>
             <Text
               className={textClasses}
-              style={[{ fontSize: 18 }, style]}
+              style={[{ fontSize }, style]}
               numberOfLines={numberOfLines}
             >
               {text}

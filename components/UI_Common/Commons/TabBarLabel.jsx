@@ -16,9 +16,9 @@ export default function TabBarLabel({ text, focused }) {
       {focused && (
         <View
           className="absolute overflow-hidden rounded-full"
-          style={{ bottom: -16, left: -6, right: -6, height: 10 }}
+          style={{ bottom: -16, left: 16, right: 16, height: 12 }}
         >
-          <GradientView preset="purpleToPink" className="flex-1" />
+          <GradientView preset="logoGradient" className="flex-1" />
         </View>
       )}
     </View>

@@ -23,9 +23,24 @@ export const Gradients = {
   progressGradient: [Colors.accent400, Colors.accent600], // Pink gradient
 
   // Custom combinations
-  purpleToPink: [Colors.primary800, Colors.primary500, Colors.accent200], // Brand gradient
+  purpleToPink: [
+    // Colors.primary800,
+    Colors.primary700,
+    Colors.primary600,
+    Colors.primary500,
+    // Colors.primary400,
+    Colors.accent300,
+    // Colors.accent200,
+  ], // Brand gradient
+  lightPurpleToPink: [
+    Colors.primary500,
+    Colors.primary400,
+    Colors.accent200,
+    Colors.accent50,
+  ], // Brand gradient
   lightPurple: [Colors.primary400, Colors.primary300, Colors.primary200], // Subtle purple
   lightPink: [Colors.accent200, Colors.accent400], // Subtle pink
+  logoGradient: [Colors.logoStart, Colors.logoEnd],
 };
 
 // Preset directions for common use cases

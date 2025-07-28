@@ -1,6 +1,6 @@
 import "./global.css";
 import { StatusBar } from "expo-status-bar";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -22,6 +22,14 @@ import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+const MyTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: Colors.mainBackground, // Using your existing color constant
+  },
+};
 
 function HomeStackNavigator() {
   return (
@@ -54,7 +62,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Tab.Navigator
           screenOptions={{
             tabBarStyle: {
@@ -74,7 +82,7 @@ export default function App() {
               <Pressable
                 {...props}
                 android_ripple={{
-                  color: Colors.primary100,
+                  color: Colors.primary200,
                   borderless: true,
                 }}
               />

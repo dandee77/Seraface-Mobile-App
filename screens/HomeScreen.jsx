@@ -1,12 +1,19 @@
 import { View, Text, FlatList } from "react-native";
-import {
-  Ionicons,
-  MaterialIcons,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { Glasses, Sparkle, Sparkles } from "lucide-react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+
+import Colors from "../constants/colors";
 import NextButton from "../components/UI_Common/Buttons/NextButton";
 import InfoContainer from "../components/Home_Screen/Main_Home/InfoContainer";
 import { GradientText } from "../components/UI_Common/Gradients/GradientText";
+import { GradientView } from "../components/UI_Common/Gradients/GradientView";
+import { useEffect } from "react";
 
 const infoData = [
   {
@@ -32,10 +39,39 @@ const infoData = [
 ];
 
 export default function HomeScreen() {
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, {
+        duration: 15000,
+        easing: Easing.linear,
+      }),
+      -1,
+      false
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }],
+    };
+  });
+
   return (
-    <View className="flex-col">
-      <View>
-        <Ionicons name="" />
+    <View className="flex-col p-8 ">
+      <View className="items-center justify-center w-full my-6">
+        <Animated.View
+          className="rounded-full overflow-hidden"
+          style={[{ width: 112, height: 112 }, animatedStyle]}
+        >
+          <GradientView
+            className="items-center justify-center w-full h-full"
+            preset="logoGradient"
+          >
+            <Sparkles size={54} color={Colors.background} />
+          </GradientView>
+        </Animated.View>
       </View>
       <View>
         <GradientText text={"Seraface AI"} size={24} preset={"purpleToPink"} />

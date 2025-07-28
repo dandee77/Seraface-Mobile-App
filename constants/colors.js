@@ -10,6 +10,9 @@ const Colors = {
   primary700: "#8836e3", // Darker purple (seen in buttons/tabs)
   primary800: "#7423c7", // Darkest purple
 
+  logoStart: "#b070ff", // Logo gradient start (purple)
+  logoEnd: "#ffaed8", // Logo gradient end (pink)
+
   // Accent Colors (pink gradient component)
   accent50: "#ffe6f5",
   accent100: "#ffccea",
@@ -62,6 +65,7 @@ const Colors = {
 
   // UI Element Colors
   background: "#ffffff", // Main white background
+  mainBackground: "#fcf0fb", // Main light pink background
   card: "#ffffff", // Card background
   border: "#e0e0e0", // Border color
   icon: "#b070ff", // Icon color (primary purple)
