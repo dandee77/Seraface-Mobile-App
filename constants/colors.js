@@ -59,13 +59,13 @@ const Colors = {
 
   // Text Colors
   textPrimary: "#333333", // Main text color
-  textSecondary: "#666666", // Secondary text color
+  textSecondary: "#555555", // Secondary text color
   textTertiary: "#909090", // Placeholder/subtle text
   textLight: "#ffffff", // White text on dark backgrounds
 
   // UI Element Colors
   background: "#ffffff", // Main white background
-  mainBackground: "#fcf0fb", // Main light pink background
+  mainBackground: "#f8f0fb", // Main light pink background
   card: "#ffffff", // Card background
   border: "#e0e0e0", // Border color
   icon: "#b070ff", // Icon color (primary purple)

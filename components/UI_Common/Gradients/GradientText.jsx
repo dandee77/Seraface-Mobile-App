@@ -31,11 +31,11 @@ export const GradientText = ({
   return (
     <View
       className={containerClasses}
-      style={{ height: fontSize * 1.5, width: estimatedWidth }}
+      style={{ height: fontSize * 1.25, width: estimatedWidth * 1.5 }}
     >
       <MaskedView
         className="overflow-hidden"
-        style={{ height: fontSize * 1.5, width: estimatedWidth * 1.21 }}
+        style={{ height: fontSize * 1.25, width: estimatedWidth * 1.65 }}
         maskElement={
           <View className={textContainerClasses}>
             <Text

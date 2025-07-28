@@ -26,8 +26,8 @@ export const Gradients = {
   purpleToPink: [
     // Colors.primary800,
     Colors.primary700,
-    Colors.primary600,
-    Colors.primary500,
+    // Colors.primary600,
+    // Colors.primary500,
     // Colors.primary400,
     Colors.accent300,
     // Colors.accent200,

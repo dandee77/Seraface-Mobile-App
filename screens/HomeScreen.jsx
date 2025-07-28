@@ -44,7 +44,7 @@ export default function HomeScreen() {
   useEffect(() => {
     rotation.value = withRepeat(
       withTiming(360, {
-        duration: 15000,
+        duration: 12000,
         easing: Easing.linear,
       }),
       -1,
@@ -60,24 +60,34 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-col p-8 ">
-      <View className="items-center justify-center w-full my-6">
+      <View className="items-center justify-center w-full my-3">
         <Animated.View
           className="rounded-full overflow-hidden"
-          style={[{ width: 112, height: 112 }, animatedStyle]}
+          style={[{ width: 100, height: 100 }, animatedStyle]}
         >
           <GradientView
             className="items-center justify-center w-full h-full"
             preset="logoGradient"
           >
-            <Sparkles size={54} color={Colors.background} />
+            <Sparkles size={48} color={Colors.background} />
           </GradientView>
         </Animated.View>
       </View>
-      <View>
-        <GradientText text={"Seraface AI"} size={24} preset={"purpleToPink"} />
-        <Text>Your AI-powered skincare companion</Text>
+
+      <View className="items-center gap-2 my-3">
+        <GradientText
+          text={"Seraface AI"}
+          preset={"purpleToPink"}
+          centerText={true}
+          style={{ fontSize: 30 }}
+        />
+        <Text className="text-center text-textSecondary text-lg">
+          Your AI-powered skincare companion
+        </Text>
       </View>
+
       <FlatList
+        className="my-3"
         data={infoData}
         renderItem={({ item }) => (
           <InfoContainer
