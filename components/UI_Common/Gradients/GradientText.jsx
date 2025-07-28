@@ -10,22 +10,36 @@ export const GradientText = ({
   direction = "leftToRight",
   focused = false,
   numberOfLines,
-  adjustsFontSizeToFit = false,
+  centerText = false,
 }) => {
   const gradientPreset = preset || (focused ? "purpleToPink" : "lightPurple");
 
   const estimatedWidth = Math.max(text.length * 9, 40);
 
+  const containerClasses = centerText
+    ? "items-center justify-center"
+    : "items-start justify-center";
+  const textClasses = centerText
+    ? "font-bold text-center"
+    : "font-bold text-left";
+  const textContainerClasses = centerText
+    ? "flex-1 bg-transparent items-center justify-center w-full"
+    : "flex-1 bg-transparent items-start justify-center w-full";
+
   return (
-    <View style={{ height: 24, minWidth: 500 }}>
+    <View
+      className={containerClasses}
+      style={{ height: 24, width: estimatedWidth }}
+    >
       <MaskedView
-        style={{ height: 24, minWidth: 500 }}
+        className="overflow-hidden"
+        style={{ height: 24, width: estimatedWidth * 1.21 }}
         maskElement={
-          <View className="flex-1 bg-transparent ">
+          <View className={textContainerClasses}>
             <Text
-              className="font-bold"
+              className={textClasses}
               style={[{ fontSize: 18 }, style]}
-              adjustsFontSizeToFit={adjustsFontSizeToFit}
+              numberOfLines={numberOfLines}
             >
               {text}
             </Text>
@@ -35,7 +49,7 @@ export const GradientText = ({
         <GradientView
           preset={gradientPreset}
           direction={direction}
-          className="flex-1"
+          className="absolute inset-0 w-full h-full"
         />
       </MaskedView>
     </View>

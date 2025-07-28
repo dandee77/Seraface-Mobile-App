@@ -4,12 +4,15 @@ import { GradientView } from "../Gradients/GradientView";
 
 export default function TabBarLabel({ text, focused }) {
   return (
-    <View>
-      <GradientText
-        text={text}
-        focused={focused}
-        style={{ fontSize: 13, paddingTop: 2 }}
-      />
+    <View className="items-center justify-center w-full">
+      <View className="w-full items-center justify-center">
+        <GradientText
+          text={text}
+          focused={focused}
+          style={{ fontSize: 13 }}
+          centerText={true}
+        />
+      </View>
       {focused && (
         <View
           className="absolute overflow-hidden rounded-full"
