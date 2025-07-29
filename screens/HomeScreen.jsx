@@ -58,7 +58,7 @@ export default function HomeScreen() {
   });
 
   return (
-    <View className="flex-col p-8 ">
+    <View className="flex-col px-8 py-6">
       <View className="items-center justify-center w-full my-3">
         <Animated.View
           className="rounded-full overflow-hidden"
