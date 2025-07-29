@@ -58,7 +58,7 @@ export default function RoutineItem({
 
         {isOpen && (
           <View className="flex-row px-4 pb-3 pt-2 border-t border-gray-100 bg-background rounded-xl">
-            <Text className="text-textSecondary">{description}</Text>
+            <Text className="text-textSecondary text-sm">{description}</Text>
           </View>
         )}
       </View>

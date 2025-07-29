@@ -78,6 +78,11 @@ const Colors = {
   // Priority Colors
   highPriority: "#ff45a4", // Pink for high priority
   mediumPriority: "#b070ff", // Purple for medium priority
+
+  // Tab Icon Colors
+  morningIcon: "#f59e0b", // Amber/yellow for morning sun icon
+  eveningIcon: "#b070ff", // Purple for evening moon icon
+  inactiveIcon: "#9ca3af", // Gray for inactive icons
 };
 
 export default Colors;

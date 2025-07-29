@@ -3,6 +3,7 @@ import TitleContainer from "../components/UI_Common/Commons/TitleContainer";
 import RoutineItem from "../components/Routines_Screen/RoutineItem";
 import NextButton from "../components/UI_Common/Buttons/NextButton";
 import { useState } from "react";
+import SegmentedControl from "../components/Routines_Screen/SegmentedControl";
 
 const morningRoutine = [
   {
@@ -10,7 +11,7 @@ const morningRoutine = [
     title: "Cleanse",
     subtitle: "Gentle Hydrating Cleanser",
     description:
-      "Wet face with lukewarm water. Apply a small amoount to face and neck, massaging in circular motions. Rinse thoroughly.",
+      "Wet face with lukewarm water. Apply a small amount to face and neck, massaging in circular motions. Rinse thoroughly.",
     duration: 30,
   },
   {
@@ -52,7 +53,7 @@ const eveningRoutine = [
     title: "Cleanse",
     subtitle: "Gentle Hydrating Cleanser",
     description:
-      "Wet face with lukewarm water. Apply a small amoount to face and neck, massaging in circular motions. Rinse thoroughly.",
+      "Wet face with lukewarm water. Apply a small amount to face and neck, massaging in circular motions. Rinse thoroughly.",
     duration: 30,
   },
   {
@@ -73,29 +74,44 @@ const eveningRoutine = [
 ];
 
 export default function RoutinesScreen({ navigation }) {
-  const [routineType, setRoutineType] = useState("morningRoutine");
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   function handleNextPress() {
     navigation.navigate("Budget");
   }
 
-  const data =
-    routineType === "morningRoutine" ? morningRoutine : eveningRoutine;
+  function handleIndexChange(index) {
+    setSelectedIndex(index);
+  }
+
+  const data = selectedIndex === 0 ? morningRoutine : eveningRoutine;
 
   return (
     <ScrollView className="flex-1">
       <View className="px-8 py-6 gap-4">
         <TitleContainer title={"Your Skincare Routine"} />
-        <View>
+
+        <SegmentedControl
+          selectedIndex={selectedIndex}
+          onChange={handleIndexChange}
+          options={[
+            { label: "Morning", icon: "sunny" },
+            { label: "Evening", icon: "moon" },
+          ]}
+        />
+
+        <View className="gap-0">
           {data.map((item) => (
             <RoutineItem key={item.id} {...item} />
           ))}
         </View>
+
         <NextButton
-          text={"Budget Planner"}
+          text={"Set Your Routine"}
           onPress={handleNextPress}
-          icon={"arrow-forward-outline"}
+          icon={"timer-outline"}
         />
+
         <View className="h-24" />
       </View>
     </ScrollView>
