@@ -8,11 +8,11 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-import Colors from "../constants/colors";
-import NextButton from "../components/UI_Common/Buttons/NextButton";
-import InfoContainer from "../components/Home_Screen/Main_Home/InfoContainer";
-import { GradientText } from "../components/UI_Common/Gradients/GradientText";
-import { GradientView } from "../components/UI_Common/Gradients/GradientView";
+import Colors from "../../constants/colors";
+import NextButton from "../../components/UI_Common/Buttons/NextButton";
+import InfoContainer from "../../components/Home_Screen/Main_Home/InfoContainer";
+import { GradientText } from "../../components/UI_Common/Gradients/GradientText";
+import { GradientView } from "../../components/UI_Common/Gradients/GradientView";
 import { useEffect } from "react";
 
 const infoData = [

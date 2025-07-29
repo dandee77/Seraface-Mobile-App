@@ -1,23 +1,21 @@
 import "./global.css";
 import { StatusBar } from "expo-status-bar";
+import { Pressable } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GradientIcon } from "./components/UI_Common/Gradients/GradientIcon";
-import { GradientText } from "./components/UI_Common/Gradients/GradientText";
 import { GradientHeaderTitle } from "./components/UI_Common/Gradients/GradientHeaderTitle";
 
-import HomeScreen from "./screens/HomeScreen";
-import ProductsScreen from "./screens/ProductsScreen";
-import RoutinesScreen from "./screens/RoutinesScreen";
-import BudgetScreen from "./screens/BudgetScreen";
+import HomeScreen from "./screens/Major_Screens/HomeScreen";
+import ProductsScreen from "./screens/Major_Screens/ProductsScreen";
+import RoutinesScreen from "./screens/Major_Screens/RoutinesScreen";
+import BudgetScreen from "./screens/Major_Screens/BudgetScreen";
 
-import SkinProfileScreen from "./components/Home_Screen/Phase1_SkinProfile/SkinProfileScreen";
-import ScanFaceScreen from "./components/Home_Screen/Phase2_ScanFace/ScanFaceScreen";
+import SkinProfileScreen from "./screens/Minor_Screens/Home/SkinProfileScreen";
+import ScanFaceScreen from "./screens/Minor_Screens/Home/ScanFaceScreen";
 import Colors from "./constants/colors";
-import { Pressable, View } from "react-native";
-import { GradientView } from "./components/UI_Common/Gradients/GradientView";
 import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
 
 const Tab = createBottomTabNavigator();
@@ -27,7 +25,7 @@ const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: Colors.mainBackground, // Using your existing color constant
+    background: Colors.mainBackground,
   },
 };
 

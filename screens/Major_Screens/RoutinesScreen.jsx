@@ -1,9 +1,9 @@
 import { View, ScrollView } from "react-native";
-import TitleContainer from "../components/UI_Common/Commons/TitleContainer";
-import RoutineItem from "../components/Routines_Screen/RoutineItem";
-import NextButton from "../components/UI_Common/Buttons/NextButton";
+import TitleContainer from "../../components/UI_Common/Commons/TitleContainer";
+import RoutineItem from "../../components/Routines_Screen/RoutineItem";
+import NextButton from "../../components/UI_Common/Buttons/NextButton";
 import { useState } from "react";
-import SegmentedControl from "../components/Routines_Screen/SegmentedControl";
+import SegmentedControl from "../../components/Routines_Screen/SegmentedControl";
 
 const morningRoutine = [
   {
