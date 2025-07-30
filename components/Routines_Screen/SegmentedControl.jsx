@@ -37,7 +37,7 @@ export default function SegmentedControl({
   return (
     <View className="my-3 relative">
       <View
-        className="bg-gray-100 rounded-xl border border-gray-200 p-[3px] flex-row relative"
+        className="bg-gray-50 rounded-xl border border-gray-200 p-[3px] flex-row relative"
         style={containerStyle}
       >
         <Animated.View

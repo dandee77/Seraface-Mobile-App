@@ -70,7 +70,7 @@ export default function App() {
             },
             headerStyle: {
               backgroundColor: Colors.background,
-              height: 80,
+              height: 85,
             },
             tabBarButton: (props) => (
               <Pressable
@@ -140,7 +140,7 @@ export default function App() {
                 <GradientIcon name={"wallet"} size={28} focused={focused} />
               ),
               tabBarLabel: ({ focused }) => (
-                <TabBarLabel text={"Products"} focused={focused} />
+                <TabBarLabel text={"Budget"} focused={focused} />
               ),
             }}
           />
