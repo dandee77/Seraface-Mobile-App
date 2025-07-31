@@ -1,5 +1,4 @@
 import { FlatList } from "react-native";
-import React from "react";
 import ProductItem from "../Commons/ProductItem";
 
 export default function ProductList({ data, contentInset }) {
