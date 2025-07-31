@@ -43,7 +43,7 @@ export default function ResultScreen({ navigation, route }) {
   };
 
   const handleViewRecommendations = () => {
-    navigation.navigate("Products");
+    navigation.navigate("Home");
   };
 
   return (
@@ -89,7 +89,7 @@ export default function ResultScreen({ navigation, route }) {
           />
 
           <NextButton
-            text="Product Recommendations"
+            text="Home"
             icon="arrow-forward-outline"
             onPress={handleViewRecommendations}
           />
