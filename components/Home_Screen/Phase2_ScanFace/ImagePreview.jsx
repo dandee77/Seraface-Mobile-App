@@ -48,7 +48,7 @@ export default function ImagePreview({ onImageSelect }) {
 
           <GradientView
             direction="diagonal"
-            preset="purpleToPink3"
+            preset="logoGradient"
             style={{ borderRadius: 12, padding: 5 }}
           >
             <View className="rounded-xl overflow-hidden">

@@ -90,6 +90,7 @@ function HomeStackNavigator() {
         options={{
           headerTitle: () => <GradientHeaderTitle title={"Analysis Report"} />,
           headerRight: () => null,
+          headerBackVisible: false,
         }}
       />
     </Stack.Navigator>
