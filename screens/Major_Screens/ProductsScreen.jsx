@@ -48,8 +48,12 @@ const productRecommendations = [
   },
 ];
 
-const ProductsScreen = () => {
+const ProductsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+
+  const handleNextButtonPressed = () => {
+    navigation.navigate("Routine");
+  };
 
   return (
     <View className="flex-1">
@@ -75,6 +79,7 @@ const ProductsScreen = () => {
           <NextButton
             text={"See Your Routine"}
             icon={"arrow-forward-outline"}
+            onPress={handleNextButtonPressed}
           />
         </View>
       </View>

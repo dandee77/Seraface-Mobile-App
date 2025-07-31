@@ -16,6 +16,7 @@ import BudgetScreen from "./screens/Major_Screens/BudgetScreen";
 
 import SkinProfileScreen from "./screens/Minor_Screens/Home/SkinProfileScreen";
 import ScanFaceScreen from "./screens/Minor_Screens/Home/ScanFaceScreen";
+import ResultScreen from "./screens/Minor_Screens/Home/ResultScreen";
 import Colors from "./constants/colors";
 import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
 
@@ -33,25 +34,63 @@ const MyTheme = {
 function HomeStackNavigator() {
   return (
     <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
+      screenOptions={({ navigation, route }) => ({
+        headerShown: true,
         animation: "slide_from_right",
-      }}
+        headerLeft: () => null,
+        headerRight: () => {
+          if (route.name === "Result" || route.name === "MainHome") return null;
+          return navigation.canGoBack() ? (
+            <Pressable
+              onPress={() => navigation.goBack()}
+              style={{ marginRight: 15 }}
+              android_ripple={{
+                color: Colors.primary200,
+                borderless: true,
+              }}
+            >
+              <GradientIcon
+                name="exit"
+                size={28}
+                focused={true}
+                style={{ transform: [{ rotate: "180deg" }] }}
+              />
+            </Pressable>
+          ) : null;
+        },
+      })}
     >
       <Stack.Screen
         name="MainHome"
         component={HomeScreen}
-        options={{ title: "Seraface" }}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"SerafaceAI"} />,
+          headerBackVisible: false,
+        }}
       />
       <Stack.Screen
         name="SkinProfile"
         component={SkinProfileScreen}
-        options={{ title: "Skin Profile" }}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Skin Profile"} />,
+          headerBackVisible: false,
+        }}
       />
       <Stack.Screen
         name="ScanFace"
         component={ScanFaceScreen}
-        options={{ title: "Scan Face" }}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Scan Face"} />,
+          headerBackVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="Result"
+        component={ResultScreen}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Analysis Report"} />,
+          headerRight: false,
+        }}
       />
     </Stack.Navigator>
   );
@@ -94,7 +133,7 @@ export default function App() {
               name="Home"
               component={HomeStackNavigator}
               options={{
-                headerTitle: () => <GradientHeaderTitle title={"SerafaceAI"} />,
+                headerShown: false,
                 tabBarIcon: ({ focused }) => (
                   <GradientIcon name={"home"} size={28} focused={focused} />
                 ),

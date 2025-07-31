@@ -51,7 +51,7 @@ const productRecommendations = [
   },
 ];
 
-const BudgetScreen = () => {
+const BudgetScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [budget, setBudget] = useState(260); // Default budget shown in first image
   const spentAmount = 77.96; // Fixed amount from the images
@@ -74,6 +74,10 @@ const BudgetScreen = () => {
     </View>
   );
 
+  const handleNextButtonPressed = () => {
+    navigation.navigate("Home");
+  };
+
   return (
     <View className="flex-1 ">
       <View className="px-8 py-6 gap-3">
@@ -95,8 +99,9 @@ const BudgetScreen = () => {
       >
         <View className="px-8 w-full">
           <NextButton
-            text={"See Your Routine"}
+            text={"Home"}
             icon={"arrow-forward-outline"}
+            onPress={handleNextButtonPressed}
           />
         </View>
       </View>

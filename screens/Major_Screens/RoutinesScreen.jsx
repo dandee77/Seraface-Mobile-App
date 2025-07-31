@@ -76,7 +76,7 @@ const eveningRoutine = [
 export default function RoutinesScreen({ navigation }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  function handleNextPress() {
+  function handleNextButtonPress() {
     navigation.navigate("Budget");
   }
 
@@ -107,9 +107,9 @@ export default function RoutinesScreen({ navigation }) {
         </View>
 
         <NextButton
-          text={"Set Your Routine"}
-          onPress={handleNextPress}
-          icon={"timer-outline"}
+          text={"Budget Planner"}
+          onPress={handleNextButtonPress}
+          icon={"arrow-forward-outline"}
         />
 
         <View className="h-24" />

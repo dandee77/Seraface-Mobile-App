@@ -37,7 +37,7 @@ const infoData = [
   },
 ];
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -56,6 +56,10 @@ export default function HomeScreen() {
       transform: [{ rotate: `${rotation.value}deg` }],
     };
   });
+
+  const handleNextButtonPressed = () => {
+    navigation.navigate("SkinProfile");
+  };
 
   return (
     <View className="flex-col px-8 py-6">
@@ -97,7 +101,11 @@ export default function HomeScreen() {
           />
         )}
       />
-      <NextButton text={"Get Started"} icon={"arrow-forward-outline"} />
+      <NextButton
+        text={"Get Started"}
+        icon={"arrow-forward-outline"}
+        onPress={handleNextButtonPressed}
+      />
     </View>
   );
 }
