@@ -9,52 +9,40 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const productRecommendations = [
   {
-    title: "Gentle Hydrating Cleanser",
-    subtitle: "CeraVe",
+    title: "CeraVe Foaming Facial Cleanser Travel Size", // Product name
+    subtitle: "Facial Wash", // Category type
     matchPercentage: 98,
     description:
       "Perfect for sensitive skin, removes impurities without drying",
-    price: 150.99,
+    price: 119.0, // Keeping current price format with ₱
     priorityLevel: "High",
-    image:
-      "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://m.media-amazon.com/images/I/41N7YPPZd5L._SL1080_.jpg",
   },
   {
-    title: "Vitamin C Serum",
-    subtitle: "The Ordinary",
+    title: "Face Republic Vita Radiance", // Product name
+    subtitle: "Moisturizer", // Category type
     matchPercentage: 95,
-    description: "Brightens skin tone and reduces hyperpigmentation",
-    price: 290.99,
+    description: "Hydrates and locks in moisture without clogging pores",
+    price: 374.0, // Keeping current price format with ₱
     priorityLevel: "Medium",
-    image:
-      "https://images.unsplash.com/photo-1627811015433-368c148f6c3c?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://m.media-amazon.com/images/I/61-uZ6L9JKL._SX466_.jpg",
   },
   {
-    title: "Niacinamide 10% + Zinc 1%",
-    subtitle: "CeraVe",
+    title: "Shangme Sunscreen Collagen Peptide & Vitamin C", // Product name
+    subtitle: "Sunscreen", // Category type
     matchPercentage: 92,
-    description: "Reduces sebum production and minimizes pores",
-    price: 120.99,
+    description: "Broad spectrum protection against UVA and UVB rays",
+    price: 299.0, // Keeping current price format with ₱
     priorityLevel: "High",
     image:
-      "https://images.unsplash.com/photo-1710410815589-dd83514104d0?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    title: "Hyaluronic Acid Moisturizer",
-    subtitle: "Neutrogena",
-    matchPercentage: 90,
-    description: "Hydrates and plumps skin with 3 molecular weights of HA",
-    price: 180.99,
-    priorityLevel: "Medium",
-    image:
-      "https://images.unsplash.com/photo-1629732047847-50219e9c5aef?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://img.lazcdn.com/g/ff/kf/S4e24eb51799744d5ae1edd0af326ec18g.jpg_720x720q80.jpg",
   },
 ];
 
 const BudgetScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [budget, setBudget] = useState(260); // Default budget shown in first image
-  const spentAmount = 77.96; // Fixed amount from the images
+  const [budget, setBudget] = useState(800); // Default budget shown in first image
+  const spentAmount = 792; // Fixed amount from the images
 
   const handleBudgetChange = (newBudget) => {
     setBudget(newBudget);
@@ -66,10 +54,14 @@ const BudgetScreen = ({ navigation }) => {
         title={"Budget Planner"}
         description={"Optimize your skincare spending"}
       />
-      <BudgetContainer budget={budget} onBudgetChange={handleBudgetChange} />
+      <BudgetContainer
+        budget={budget}
+        onBudgetChange={handleBudgetChange}
+        spentAmount={spentAmount}
+      />
       <RoadmapContainer spentAmount={spentAmount} budget={budget} />
       <View className="flex-col mt-4">
-        <Text className="font-bold text-lg">Purchase Priority</Text>
+        <Text className="font-bold text-lg">Purchased Products</Text>
       </View>
     </View>
   );

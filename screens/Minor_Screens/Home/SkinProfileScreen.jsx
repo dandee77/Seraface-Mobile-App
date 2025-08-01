@@ -18,7 +18,7 @@ const SkinProfileScreen = ({ navigation }) => {
     "acne",
     "uneven-skin tone",
   ]);
-  const [budget, setBudget] = useState("500"); // Set default to 500 as a string for TextInput
+  const [budget, setBudget] = useState("800"); // Set default to 500 as a string for TextInput
   const [allergies, setAllergies] = useState(["alcohol", "fragrance"]);
   const [productExperiences, setProductExperiences] = useState([
     {
@@ -114,7 +114,7 @@ const SkinProfileScreen = ({ navigation }) => {
                   keyboardType="numeric"
                   value={budget}
                   onChangeText={handleBudgetChange}
-                  placeholder="500"
+                  placeholder="800"
                   placeholderTextColor={Colors.textTertiary}
                 />
               </View>

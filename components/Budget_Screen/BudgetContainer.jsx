@@ -1,69 +1,109 @@
-import { View, Text } from "react-native";
+import { View, Text, TextInput } from "react-native";
+import React, { useState, useEffect } from "react";
 import Colors from "../../constants/colors";
-import Slider from "@react-native-community/slider";
 import { LinearGradient } from "expo-linear-gradient";
 import { Gradients } from "../../constants/gradients";
 
 const MIN_BUDGET = 50;
-const MAX_BUDGET = 300;
+const MAX_BUDGET = 800;
 
-export default function BudgetContainer({ budget, onBudgetChange }) {
-  const handleValueChange = (value) => {
-    const newBudget = Math.round(value);
-    onBudgetChange(newBudget);
+export default function BudgetContainer({
+  budget,
+  onBudgetChange,
+  spentAmount = 0,
+}) {
+  // Use local state to track the input value as a string
+  const [inputValue, setInputValue] = useState(budget.toString());
+
+  // Update local input value when budget prop changes
+  useEffect(() => {
+    setInputValue(budget.toString());
+  }, [budget]);
+
+  const handleBudgetChange = (value) => {
+    // Always update the input field to show what the user is typing
+    setInputValue(value);
+
+    // Only proceed if the input is a valid number format
+    if (/^\d*\.?\d*$/.test(value)) {
+      if (value === "") return;
+
+      let newBudget = Math.round(parseFloat(value));
+
+      if (!isNaN(newBudget)) {
+        onBudgetChange(newBudget); // Let parent decide what to do
+      }
+    }
   };
 
+  // Handle blur event to ensure final value is valid
+  const handleBlur = () => {
+    let finalBudget = parseFloat(inputValue);
+
+    if (isNaN(finalBudget)) {
+      finalBudget = Math.max(MIN_BUDGET, spentAmount);
+    } else {
+      finalBudget = Math.round(finalBudget);
+      finalBudget = Math.max(Math.max(MIN_BUDGET, spentAmount), finalBudget);
+      finalBudget = Math.min(finalBudget, MAX_BUDGET);
+    }
+
+    setInputValue(finalBudget.toString());
+    onBudgetChange(finalBudget);
+  };
+
+  // Calculate percentage based on spent amount or minimum budget
   const gradientPercentage =
+    ((Math.max(spentAmount, MIN_BUDGET) - MIN_BUDGET) /
+      (MAX_BUDGET - MIN_BUDGET)) *
+    100;
+
+  // For the actual budget value
+  const budgetPercentage =
     ((budget - MIN_BUDGET) / (MAX_BUDGET - MIN_BUDGET)) * 100;
 
   return (
     <View className="bg-white rounded-2xl px-5 py-4 my-2 shadow-sm">
-      <View className="flex-row justify-between items-center mb-4">
-        <View className="flex-row items-center gap-3">
-          <View className="bg-success-500 w-12 h-12 rounded-full items-center justify-center">
-            <Text className="text-textLight text-3xl">₱</Text>
+      <View className="flex-row items-center gap-3 mb-4">
+        <View className="bg-success-500 w-12 h-12 rounded-full items-center justify-center">
+          <Text className="text-textLight text-3xl">₱</Text>
+        </View>
+        <View>
+          <Text className="font-bold text-lg">Adjust Your Budget</Text>
+          <Text className="text-textSecondary text-sm">
+            Set your monthly limit
+          </Text>
+        </View>
+      </View>
+
+      <View className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
+        <View className="flex-row justify-between items-center">
+          <Text className="text-textSecondary">Monthly skincare budget</Text>
+          <View className="flex-row items-center">
+            <Text className="font-bold text-success-500 mr-1">₱</Text>
+            <TextInput
+              className="border border-gray-200 bg-white rounded-lg py-1 px-3 min-w-[80px] text-right font-bold text-success-500"
+              keyboardType="numeric"
+              value={inputValue}
+              onChangeText={handleBudgetChange}
+              onBlur={handleBlur}
+              placeholder={MIN_BUDGET.toString()}
+              placeholderTextColor={Colors.textTertiary}
+            />
           </View>
-          <View>
-            <Text className="font-bold text-lg">Your Budget</Text>
-            <Text className="text-textSecondary text-sm">
-              Set your monthly limit
+        </View>
+      </View>
+
+      <View className="flex-row justify-between mt-1">
+        <View className="flex-row items-center">
+          <Text className="text-textSecondary text-sm">Min: ₱{MIN_BUDGET}</Text>
+          {spentAmount > MIN_BUDGET && (
+            <Text className="text-success-500 text-xs ml-2">
+              (₱{spentAmount} spent)
             </Text>
-          </View>
+          )}
         </View>
-        <Text className="text-success500 text-xl font-semibold">₱{budget}</Text>
-      </View>
-
-      <View className="my-6 relative">
-        <View className="absolute left-0 right-0 h-2 bg-gray-100 rounded-full" />
-
-        <View
-          className="absolute left-0 h-2 rounded-full overflow-hidden"
-          style={{ width: `${gradientPercentage}%` }}
-        >
-          <LinearGradient
-            colors={Gradients.purpleToPink3}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={{ width: "100%", height: "100%" }}
-          />
-        </View>
-
-        <Slider
-          style={{ width: "100%", height: 1, marginTop: 3 }}
-          minimumValue={MIN_BUDGET}
-          maximumValue={MAX_BUDGET}
-          value={budget}
-          onValueChange={handleValueChange}
-          minimumTrackTintColor="transparent"
-          maximumTrackTintColor="transparent"
-          thumbTintColor={Colors.primary600}
-          step={1}
-        />
-      </View>
-
-      <View className="flex-row justify-between">
-        <Text className="text-textSecondary text-sm">₱{MIN_BUDGET}</Text>
-        <Text className="text-textSecondary text-sm">₱{MAX_BUDGET}</Text>
+        <Text className="text-textSecondary text-sm">Max: ₱{budget}</Text>
       </View>
     </View>
   );
