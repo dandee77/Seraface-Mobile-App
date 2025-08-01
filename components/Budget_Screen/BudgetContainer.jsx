@@ -1,5 +1,4 @@
 import { View, Text } from "react-native";
-import React from "react";
 import Colors from "../../constants/colors";
 import Slider from "@react-native-community/slider";
 import { LinearGradient } from "expo-linear-gradient";
