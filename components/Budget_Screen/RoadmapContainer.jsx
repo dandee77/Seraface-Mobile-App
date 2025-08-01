@@ -32,9 +32,9 @@ export default function RoadmapContainer({ spentAmount, budget }) {
         <Text className="font-bold text-lg">Recommended Roadmap</Text>
         <View className="flex-row gap-2">
           <Text className="text-success-500 font-medium">
-            ${spentAmount.toFixed(2)}
+            ₱{spentAmount.toFixed(2)}
           </Text>
-          <Text>/ ${budget}</Text>
+          <Text>/ ₱{budget}</Text>
         </View>
       </View>
 

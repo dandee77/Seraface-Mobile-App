@@ -22,7 +22,7 @@ export default function BudgetContainer({ budget, onBudgetChange }) {
       <View className="flex-row justify-between items-center mb-4">
         <View className="flex-row items-center gap-3">
           <View className="bg-success-500 w-12 h-12 rounded-full items-center justify-center">
-            <Text className="text-textLight text-3xl">$</Text>
+            <Text className="text-textLight text-3xl">₱</Text>
           </View>
           <View>
             <Text className="font-bold text-lg">Your Budget</Text>
@@ -31,7 +31,7 @@ export default function BudgetContainer({ budget, onBudgetChange }) {
             </Text>
           </View>
         </View>
-        <Text className="text-success500 text-xl font-semibold">${budget}</Text>
+        <Text className="text-success500 text-xl font-semibold">₱{budget}</Text>
       </View>
 
       <View className="my-6 relative">
@@ -63,8 +63,8 @@ export default function BudgetContainer({ budget, onBudgetChange }) {
       </View>
 
       <View className="flex-row justify-between">
-        <Text className="text-textSecondary text-sm">${MIN_BUDGET}</Text>
-        <Text className="text-textSecondary text-sm">${MAX_BUDGET}</Text>
+        <Text className="text-textSecondary text-sm">₱{MIN_BUDGET}</Text>
+        <Text className="text-textSecondary text-sm">₱{MAX_BUDGET}</Text>
       </View>
     </View>
   );

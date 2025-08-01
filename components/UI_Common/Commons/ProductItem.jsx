@@ -55,7 +55,7 @@ export default function ProductItem({
 
           <View className="flex-row justify-between items-center mt-auto">
             <View className="flex-row items-end gap-1">
-              <Text className="font-bold text-md">${price}</Text>
+              <Text className="font-bold text-md">₱{price}</Text>
               <Text
                 className={`text-xs ${priorityLevel ? (priorityLevel == "High" ? "text-highPriority" : "text-mediumPriority") : "text-textSecondary"}  align-bottom`}
               >
