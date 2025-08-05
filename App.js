@@ -19,6 +19,8 @@ import ScanFaceScreen from "./screens/Minor_Screens/Home/ScanFaceScreen";
 import ResultScreen from "./screens/Minor_Screens/Home/ResultScreen";
 import Colors from "./constants/colors";
 import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
+import CommunityScreen from "./screens/Major_Screens/CommunityScreen";
+import ChatFAB from "./components/UI_Common/Commons/ChatFAB";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -188,7 +190,21 @@ export default function App() {
                 ),
               }}
             />
+            <Tab.Screen
+              name="Community"
+              component={CommunityScreen}
+              options={{
+                headerTitle: () => <GradientHeaderTitle title={"Community"} />,
+                tabBarIcon: ({ focused }) => (
+                  <GradientIcon name={"people"} size={28} focused={focused} />
+                ),
+                tabBarLabel: ({ focused }) => (
+                  <TabBarLabel text={"Community"} focused={focused} />
+                ),
+              }}
+            />
           </Tab.Navigator>
+          {/* <ChatFAB /> */}
         </NavigationContainer>
       </SafeAreaProvider>
     </GestureHandlerRootView>

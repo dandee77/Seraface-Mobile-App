@@ -4,6 +4,8 @@ import ProductList from "../../components/UI_Common/Lists/ProductList";
 import NextButton from "../../components/UI_Common/Buttons/NextButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+// Put budget screen inside this product screen component
+
 const productRecommendations = [
   {
     title: "CeraVe Foaming Facial Cleanser Travel Size", // Product name
