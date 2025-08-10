@@ -1,5 +1,6 @@
-import { ScrollView, View, Text, TextInput } from "react-native";
-import React, { useState } from "react";
+import { ScrollView, View, Text, TextInput, Alert } from "react-native";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import TitleContainer from "../../../components/UI_Common/Commons/TitleContainer";
 import SkinTypeList from "../../../components/Home_Screen/Phase1_SkinProfile/SkinTypeList";
 import NextButton from "../../../components/UI_Common/Buttons/NextButton";
@@ -8,96 +9,212 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "../../../constants/colors";
 import ProductExperienceInput from "../../../components/Home_Screen/Phase1_SkinProfile/ProductExperienceInput";
 
+// Redux imports
+import {
+  setSkinType,
+  addSkinCondition,
+  removeSkinCondition,
+  addAllergy,
+  removeAllergy,
+  addGoal,
+  removeGoal,
+  addProductExperience,
+  removeProductExperience,
+  setBudget,
+  setCustomGoal,
+  clearError,
+} from "../../../store/slices/skincareSlice";
+import {
+  setSessionId,
+  setCurrentPhase,
+  setFormIndex,
+} from "../../../store/slices/authSlice";
+import { useSubmitFormAnalysisMutation } from "../../../store/api/skincareApi";
+
 const SkinProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  // Default values based on the provided data
-  const [selectedSkinType, setSelectedSkinType] = useState("oily");
-  const [skinConditions, setSkinConditions] = useState([
-    "whiteheads",
-    "dark spots",
-    "acne",
-    "uneven-skin tone",
-  ]);
-  const [budget, setBudget] = useState("800"); // Set default to 500 as a string for TextInput
-  const [allergies, setAllergies] = useState(["alcohol", "fragrance"]);
-  const [productExperiences, setProductExperiences] = useState([
-    {
-      product: "celeteque",
-      experience: "neutral",
-      reason: "saw improvements at first but stopped seeing after a week",
-    },
-  ]);
-  const [goals, setGoals] = useState(["clear skin"]);
-  const [customGoal, setCustomGoal] = useState("maintain and improve skin");
+  const dispatch = useDispatch();
+
+  // Redux state
+  const formData = useSelector((state) => state.skincare.formData);
+  const formError = useSelector((state) => state.skincare.errors.form);
+  const sessionId = useSelector((state) => state.auth.sessionId);
+
+  // RTK Query mutation
+  const [
+    submitFormAnalysis,
+    { isLoading, error: mutationError, isSuccess, data: responseData },
+  ] = useSubmitFormAnalysisMutation();
+
+  // Destructure form data for easier access
+  const {
+    skin_type,
+    skin_conditions,
+    budget,
+    allergies,
+    product_experiences,
+    goals,
+    custom_goal,
+  } = formData;
+
+  // Handle form submission success
+  useEffect(() => {
+    if (isSuccess && responseData) {
+      console.log("✅ Form submission successful:", responseData);
+
+      // Store session ID and update phase
+      dispatch(setSessionId(responseData.session_id));
+      dispatch(setFormIndex(responseData.form_index));
+      dispatch(setCurrentPhase("scan"));
+
+      // Navigate to next screen
+      navigation.navigate("ScanFace");
+    }
+  }, [isSuccess, responseData, dispatch, navigation]);
+
+  // Handle errors
+  useEffect(() => {
+    if (mutationError) {
+      console.error("❌ Form submission error:", mutationError);
+      Alert.alert(
+        "Submission Error",
+        mutationError.message || "Failed to submit form. Please try again.",
+        [{ text: "OK", onPress: () => dispatch(clearError("form")) }]
+      );
+    }
+  }, [mutationError, dispatch]);
+
+  // Event handlers
+  const handleSkinTypeChange = (type) => {
+    dispatch(setSkinType([type])); // Backend expects array
+  };
 
   const handleAddSkinCondition = (condition) => {
-    if (!skinConditions.includes(condition)) {
-      setSkinConditions([...skinConditions, condition]);
-    }
+    dispatch(addSkinCondition(condition.toLowerCase()));
   };
 
   const handleRemoveSkinCondition = (condition) => {
-    setSkinConditions(skinConditions.filter((item) => item !== condition));
+    dispatch(removeSkinCondition(condition));
   };
 
   const handleAddAllergy = (allergy) => {
-    if (!allergies.includes(allergy)) {
-      setAllergies([...allergies, allergy]);
-    }
+    dispatch(addAllergy(allergy.toLowerCase()));
   };
 
   const handleRemoveAllergy = (allergy) => {
-    setAllergies(allergies.filter((item) => item !== allergy));
+    dispatch(removeAllergy(allergy));
   };
 
   const handleAddGoal = (goal) => {
-    if (!goals.includes(goal)) {
-      setGoals([...goals, goal]);
-    }
+    dispatch(addGoal(goal.toLowerCase()));
   };
 
   const handleRemoveGoal = (goal) => {
-    setGoals(goals.filter((item) => item !== goal));
+    dispatch(removeGoal(goal));
   };
 
   const handleAddProductExperience = (experience) => {
-    setProductExperiences([...productExperiences, experience]);
+    // Transform to match backend structure
+    const formattedExperience = {
+      product: experience.product,
+      experience: experience.experience,
+      reason: experience.reason || null,
+    };
+    dispatch(addProductExperience(formattedExperience));
   };
 
   const handleRemoveProductExperience = (index) => {
-    setProductExperiences(productExperiences.filter((_, i) => i !== index));
+    dispatch(removeProductExperience(index));
   };
 
-  // Updated to handle text input
   const handleBudgetChange = (value) => {
     // Only allow numeric input
     if (/^\d*\.?\d*$/.test(value)) {
-      setBudget(value);
+      dispatch(setBudget(value));
     }
   };
 
-  const handleNextButtonPressed = () => {
-    // Save user input to state or context if needed
-    // Here we could save the full profile data including the new fields
-    navigation.navigate("ScanFace");
+  const handleCustomGoalChange = (goal) => {
+    dispatch(setCustomGoal(goal));
+  };
+
+  // Form validation
+  const validateForm = () => {
+    if (skin_type.length === 0) {
+      Alert.alert("Validation Error", "Please select your skin type.");
+      return false;
+    }
+
+    if (!budget || budget.trim() === "") {
+      Alert.alert("Validation Error", "Please enter your budget.");
+      return false;
+    }
+
+    if (skin_conditions.length === 0) {
+      Alert.alert(
+        "Validation Error",
+        "Please add at least one skin condition."
+      );
+      return false;
+    }
+
+    if (goals.length === 0 && (!custom_goal || custom_goal.trim() === "")) {
+      Alert.alert(
+        "Validation Error",
+        "Please add at least one goal or custom goal."
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    // Clear any previous errors
+    dispatch(clearError("form"));
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+
+    // Prepare data for submission
+    const submissionData = {
+      skin_type,
+      skin_conditions,
+      budget,
+      allergies,
+      product_experiences,
+      goals,
+      custom_goal,
+    };
+
+    console.log("📤 Submitting form data:", submissionData);
+
+    try {
+      await submitFormAnalysis(submissionData).unwrap();
+    } catch (error) {
+      console.error("❌ Submission failed:", error);
+      // Error handling is done in useEffect above
+    }
   };
 
   return (
     <ScrollView
       className="flex-1"
       contentContainerStyle={{
-        paddingBottom: Math.max(insets.bottom + 80, 100), // Added extra padding to ensure NextButton visibility
+        paddingBottom: Math.max(insets.bottom + 100, 120),
       }}
     >
       <View className="px-8 py-6">
         <TitleContainer title={"Tell us about your skin"} />
 
         <SkinTypeList
-          selectedSkinType={selectedSkinType}
-          onSkinTypeChange={setSelectedSkinType}
+          selectedSkinType={skin_type[0] || ""} // Pass first item or empty string
+          onSkinTypeChange={handleSkinTypeChange}
         />
 
-        {/* Budget Input - Now using TextInput instead of Slider */}
+        {/* Budget Input */}
         <View className="my-4">
           <Text className="text-[#444] font-medium mb-2">
             What's your budget (₱)?
@@ -125,7 +242,7 @@ const SkinProfileScreen = ({ navigation }) => {
         <SkinInput
           title="Skin Conditions"
           placeholder="e.g., Acne, Rosacea, Hyperpigmentation"
-          items={skinConditions}
+          items={skin_conditions}
           onAddItem={handleAddSkinCondition}
           onRemoveItem={handleRemoveSkinCondition}
         />
@@ -152,19 +269,19 @@ const SkinProfileScreen = ({ navigation }) => {
           <TextInput
             className="border border-gray-200 bg-white rounded-xl py-3 px-4"
             placeholder="Describe your main skincare goal"
-            value={customGoal}
-            onChangeText={setCustomGoal}
+            value={custom_goal}
+            onChangeText={handleCustomGoalChange}
             multiline
           />
         </View>
 
-        {/* Product Experiences with extended details */}
+        {/* Product Experiences */}
         <View className="my-4">
           <Text className="text-[#444] font-medium mb-2">
             Product Experiences
           </Text>
 
-          {productExperiences.map((experience, index) => (
+          {product_experiences.map((experience, index) => (
             <View
               key={index}
               className="bg-white rounded-xl p-3 mb-3 border border-gray-200"
@@ -173,9 +290,9 @@ const SkinProfileScreen = ({ navigation }) => {
                 <Text className="font-bold">{experience.product}</Text>
                 <Text
                   className={
-                    experience.experience === "positive"
+                    experience.experience === "good"
                       ? "text-success-500"
-                      : experience.experience === "negative"
+                      : experience.experience === "bad"
                         ? "text-error-500"
                         : "text-primary-500"
                   }
@@ -183,9 +300,11 @@ const SkinProfileScreen = ({ navigation }) => {
                   {experience.experience}
                 </Text>
               </View>
-              <Text className="text-textSecondary mt-1">
-                {experience.reason}
-              </Text>
+              {experience.reason && (
+                <Text className="text-textSecondary mt-1">
+                  {experience.reason}
+                </Text>
+              )}
               <Text
                 className="text-primary-600 mt-2 text-right"
                 onPress={() => handleRemoveProductExperience(index)}
@@ -200,14 +319,33 @@ const SkinProfileScreen = ({ navigation }) => {
           />
         </View>
 
+        {/* Error Display */}
+        {(formError || mutationError) && (
+          <View className="bg-error-100 border border-error-300 rounded-xl p-4 mb-4">
+            <Text className="text-error-700 text-center">
+              {formError || mutationError?.message}
+            </Text>
+          </View>
+        )}
+
+        {/* Submit Button */}
         <View className="mb-5">
-          {/* Increased bottom margin for better visibility */}
           <NextButton
-            text={"Next: Face Scan"}
-            icon={"arrow-forward-outline"}
-            onPress={handleNextButtonPressed}
+            text={isLoading ? "Submitting..." : "Next: Face Scan"}
+            icon={isLoading ? "hourglass-outline" : "arrow-forward-outline"}
+            onPress={handleSubmit}
+            disabled={isLoading}
           />
         </View>
+
+        {/* Debug Info (remove in production) */}
+        {__DEV__ && sessionId && (
+          <View className="mt-4 p-4 bg-gray-100 rounded-xl">
+            <Text className="text-sm text-gray-600">
+              Debug - Session ID: {sessionId}
+            </Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

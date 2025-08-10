@@ -6,19 +6,19 @@ import Colors from "../../../constants/colors";
 
 export default function ProductExperienceInput({ onAddExperience }) {
   const [product, setProduct] = useState("");
-  const [experience, setExperience] = useState("neutral"); // positive, negative, neutral
+  const [experience, setExperience] = useState("good"); // good, bad, neutral
   const [reason, setReason] = useState("");
 
   const handleAddExperience = () => {
-    if (product.trim() !== "" && reason.trim() !== "") {
+    if (product.trim() !== "") {
       onAddExperience({
         product: product.trim(),
         experience,
-        reason: reason.trim(),
+        reason: reason.trim() || null, // Send null if empty, matching backend structure
       });
       // Reset form
       setProduct("");
-      setExperience("neutral");
+      setExperience("good");
       setReason("");
     }
   };
@@ -34,19 +34,19 @@ export default function ProductExperienceInput({ onAddExperience }) {
 
       <View className="flex-row justify-between mb-3">
         <TouchableOpacity
-          onPress={() => setExperience("positive")}
+          onPress={() => setExperience("good")}
           className={`flex-1 mr-2 py-2 rounded-xl items-center ${
-            experience === "positive"
+            experience === "good"
               ? "bg-success-100 border border-success-300"
               : "bg-gray-100"
           }`}
         >
           <Text
             className={
-              experience === "positive" ? "text-success-700" : "text-gray-500"
+              experience === "good" ? "text-success-700" : "text-gray-500"
             }
           >
-            Positive
+            Good
           </Text>
         </TouchableOpacity>
 
@@ -68,26 +68,26 @@ export default function ProductExperienceInput({ onAddExperience }) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setExperience("negative")}
+          onPress={() => setExperience("bad")}
           className={`flex-1 ml-2 py-2 rounded-xl items-center ${
-            experience === "negative"
+            experience === "bad"
               ? "bg-error-100 border border-error-300"
               : "bg-gray-100"
           }`}
         >
           <Text
             className={
-              experience === "negative" ? "text-error-700" : "text-gray-500"
+              experience === "bad" ? "text-error-700" : "text-gray-500"
             }
           >
-            Negative
+            Bad
           </Text>
         </TouchableOpacity>
       </View>
 
       <TextInput
         className="border border-gray-200 bg-white rounded-xl py-2 px-3 mb-3"
-        placeholder="Reason for your experience"
+        placeholder="Reason for your experience (optional)"
         value={reason}
         onChangeText={setReason}
         multiline
@@ -96,13 +96,13 @@ export default function ProductExperienceInput({ onAddExperience }) {
 
       <TouchableOpacity
         onPress={handleAddExperience}
-        disabled={!product.trim() || !reason.trim()}
+        disabled={!product.trim()}
         className="overflow-hidden rounded-xl h-[46px]"
       >
         <GradientView
           preset="purpleToPink3"
           className={`rounded-xl h-full w-full items-center justify-center ${
-            !product.trim() || !reason.trim() ? "opacity-50" : ""
+            !product.trim() ? "opacity-50" : ""
           }`}
         >
           <View className="flex-row items-center justify-center">
