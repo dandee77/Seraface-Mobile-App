@@ -1,23 +1,32 @@
 import { View, Text, ScrollView } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GradientText } from "../../../components/UI_Common/Gradients/GradientText";
 import NextButton from "../../../components/UI_Common/Buttons/NextButton";
 import AnalysisResultItem from "../../../components/Home_Screen/Results/AnalysisResultItem";
-import AnalysisDetailItem from "../../../components/Home_Screen/Results/AnalysisDetailItem";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 
 export default function ResultScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const imageUri = route.params?.imageUri;
+  const routeAnalysisData = route.params?.analysisData;
 
-  // Hardcoded analysis results from the AI response
-  const [analysisData] = useState({
-    session_id: "130810ec-9810-498b-91d4-154fe4006831",
+  // Get analysis data from Redux store as fallback
+  const reduxAnalysisData = useSelector(
+    (state) => state.skincare.analysisResults
+  );
+
+  // Use data from route params or Redux store
+  const analysisData = routeAnalysisData || reduxAnalysisData;
+
+  // Fallback mock data (only used if no real data available)
+  const mockAnalysisData = {
+    session_id: "mock-session-id",
     status: "success",
-    message: "Image analysis completed and saved successfully",
+    message: "Mock analysis data - no backend connection",
     next_phase: "Product recommendations",
     analysis: {
-      message: "Face done analyzing",
+      message: "Mock face analysis",
       ai_output: {
         redness_irritation: "mild",
         acne_breakouts: {
@@ -56,108 +65,142 @@ export default function ResultScreen({ navigation, route }) {
         skin_elasticity: "average",
       },
     },
-  });
+  };
 
-  // Processed analysis results for display
+  // Use real data if available, otherwise use mock data
+  const finalAnalysisData = analysisData || mockAnalysisData;
+
+  // Log the data source for debugging
+  useEffect(() => {
+    if (analysisData) {
+      console.log("📊 Using real analysis data:", analysisData.session_id);
+    } else {
+      console.log("⚠️ Using mock analysis data - no backend connection");
+    }
+  }, [analysisData]);
+
+  // Helper function to format array locations
+  const formatLocations = (locations) => {
+    if (!locations || locations.length === 0) return null;
+    return locations.join(", ");
+  };
+
+  // Helper function to format presence values
+  const formatPresence = (presence) => {
+    return presence ? "Present" : "Not present";
+  };
+
+  // Process analysis results for display
   const analysisResults = [
     {
       id: 1,
       title: "Skin Type Analysis",
-      description:
-        "Your skin shows combination characteristics with oiliness in the T-zone.",
+      description: `Your skin shows ${finalAnalysisData.analysis.ai_output.oiliness_shine.level} oiliness levels and ${finalAnalysisData.analysis.ai_output.skin_elasticity} elasticity.`,
       details: [
         {
           label: "Oiliness Level",
-          value: analysisData.analysis.ai_output.oiliness_shine.level,
-          locations: analysisData.analysis.ai_output.oiliness_shine.location,
+          value: finalAnalysisData.analysis.ai_output.oiliness_shine.level,
+          locations: formatLocations(
+            finalAnalysisData.analysis.ai_output.oiliness_shine.location
+          ),
         },
         {
-          label: "Dryness",
-          value: analysisData.analysis.ai_output.dryness_flaking.presence
-            ? "Present"
-            : "Not present",
-          locations: [],
+          label: "Dryness/Flaking",
+          value: formatPresence(
+            finalAnalysisData.analysis.ai_output.dryness_flaking.presence
+          ),
+          locations: formatLocations(
+            finalAnalysisData.analysis.ai_output.dryness_flaking.location
+          ),
         },
         {
           label: "Skin Elasticity",
-          value: analysisData.analysis.ai_output.skin_elasticity,
+          value: finalAnalysisData.analysis.ai_output.skin_elasticity,
+        },
+        {
+          label: "Dehydration Signs",
+          value: finalAnalysisData.analysis.ai_output.dehydrated_skin_signs,
         },
       ],
     },
     {
       id: 2,
       title: "Acne & Congestion Assessment",
-      description: "You have mild acne with some blackheads and whiteheads.",
+      description: `You have ${finalAnalysisData.analysis.ai_output.acne_breakouts.severity} acne with ${formatPresence(finalAnalysisData.analysis.ai_output.blackheads_whiteheads.presence).toLowerCase()} blackheads and whiteheads.`,
       details: [
         {
           label: "Acne Severity",
-          value: analysisData.analysis.ai_output.acne_breakouts.severity,
-          locations: analysisData.analysis.ai_output.acne_breakouts.location,
+          value: finalAnalysisData.analysis.ai_output.acne_breakouts.severity,
+          locations: formatLocations(
+            finalAnalysisData.analysis.ai_output.acne_breakouts.location
+          ),
         },
         {
           label: "Breakout Count",
-          value: `${analysisData.analysis.ai_output.acne_breakouts.count_estimate} visible`,
+          value: `${finalAnalysisData.analysis.ai_output.acne_breakouts.count_estimate} visible`,
         },
         {
           label: "Blackheads/Whiteheads",
-          value: analysisData.analysis.ai_output.blackheads_whiteheads.presence
-            ? "Present"
-            : "Not present",
-          locations:
-            analysisData.analysis.ai_output.blackheads_whiteheads.location,
+          value: formatPresence(
+            finalAnalysisData.analysis.ai_output.blackheads_whiteheads.presence
+          ),
+          locations: formatLocations(
+            finalAnalysisData.analysis.ai_output.blackheads_whiteheads.location
+          ),
         },
         {
           label: "Hormonal Signs",
-          value: analysisData.analysis.ai_output.hormonal_acne_signs,
+          value: finalAnalysisData.analysis.ai_output.hormonal_acne_signs,
         },
       ],
     },
     {
       id: 3,
       title: "Skin Tone & Texture",
-      description: "Your skin shows mild uneven tone with medium pore size.",
+      description: `Your skin shows ${finalAnalysisData.analysis.ai_output.uneven_skin_tone} uneven tone with ${finalAnalysisData.analysis.ai_output.pores_size.level} pore size.`,
       details: [
         {
           label: "Uneven Tone",
-          value: analysisData.analysis.ai_output.uneven_skin_tone,
+          value: finalAnalysisData.analysis.ai_output.uneven_skin_tone,
         },
         {
           label: "Dark Spots/Scars",
-          value: analysisData.analysis.ai_output.dark_spots_scars.presence
-            ? "Present"
-            : "Not present",
+          value: formatPresence(
+            finalAnalysisData.analysis.ai_output.dark_spots_scars.presence
+          ),
           description:
-            analysisData.analysis.ai_output.dark_spots_scars.description,
+            finalAnalysisData.analysis.ai_output.dark_spots_scars.description,
         },
         {
           label: "Pore Size",
-          value: analysisData.analysis.ai_output.pores_size.level,
-          locations: analysisData.analysis.ai_output.pores_size.location,
+          value: finalAnalysisData.analysis.ai_output.pores_size.level,
+          locations: formatLocations(
+            finalAnalysisData.analysis.ai_output.pores_size.location
+          ),
         },
       ],
     },
     {
       id: 4,
       title: "Additional Observations",
-      description: "Your skin shows mild redness and no signs of dehydration.",
+      description: `Your skin shows ${finalAnalysisData.analysis.ai_output.redness_irritation} redness and ${finalAnalysisData.analysis.ai_output.stress_related_flareups} stress-related signs.`,
       details: [
         {
           label: "Redness/Irritation",
-          value: analysisData.analysis.ai_output.redness_irritation,
+          value: finalAnalysisData.analysis.ai_output.redness_irritation,
         },
         {
           label: "Stress-Related Signs",
-          value: analysisData.analysis.ai_output.stress_related_flareups,
-        },
-        {
-          label: "Dehydration Signs",
-          value: analysisData.analysis.ai_output.dehydrated_skin_signs,
+          value: finalAnalysisData.analysis.ai_output.stress_related_flareups,
         },
         {
           label: "Fine Lines/Wrinkles",
-          value: analysisData.analysis.ai_output.fine_lines_wrinkles.presence
-            ? "Present"
-            : "Not present",
+          value: formatPresence(
+            finalAnalysisData.analysis.ai_output.fine_lines_wrinkles.presence
+          ),
+          locations: formatLocations(
+            finalAnalysisData.analysis.ai_output.fine_lines_wrinkles.areas
+          ),
         },
       ],
     },
@@ -165,11 +208,11 @@ export default function ResultScreen({ navigation, route }) {
 
   const handleExportData = () => {
     // In a real app, this would handle exporting analysis data
-    console.log("Exporting face data analysis", analysisData.session_id);
+    console.log("Exporting face data analysis", finalAnalysisData.session_id);
   };
 
   const handleViewRecommendations = () => {
-    navigation.navigate("Home");
+    navigation.navigate("Products");
   };
 
   return (
@@ -190,7 +233,7 @@ export default function ResultScreen({ navigation, route }) {
           />
 
           <Text className="text-center text-textSecondary mt-3 mb-6">
-            {analysisData.analysis.message}. Here's what we've found:
+            {finalAnalysisData.analysis.message}. Here's what we've found:
           </Text>
         </View>
 
@@ -211,15 +254,20 @@ export default function ResultScreen({ navigation, route }) {
           <Text className="text-textSecondary mb-1">
             Analysis Status:{" "}
             <Text className="text-success-500 font-medium">
-              {analysisData.status}
+              {finalAnalysisData.status}
             </Text>
           </Text>
           <Text className="text-textSecondary">
             Next:{" "}
             <Text className="text-primary-600 font-medium">
-              {analysisData.next_phase}
+              {finalAnalysisData.next_phase}
             </Text>
           </Text>
+          {!analysisData && (
+            <Text className="text-warning-600 text-sm mt-2">
+              ⚠️ Using mock data - backend not connected
+            </Text>
+          )}
         </View>
 
         {/* Buttons */}
@@ -236,6 +284,18 @@ export default function ResultScreen({ navigation, route }) {
             onPress={handleViewRecommendations}
           />
         </View>
+
+        {/* Debug Info (remove in production) */}
+        {__DEV__ && (
+          <View className="mt-4 p-4 bg-gray-100 rounded-xl">
+            <Text className="text-sm text-gray-600">
+              Debug - Session ID: {finalAnalysisData.session_id}
+            </Text>
+            <Text className="text-sm text-gray-600">
+              Data Source: {analysisData ? "Backend" : "Mock"}
+            </Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

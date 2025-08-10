@@ -19,24 +19,59 @@ export default function ImagePreview({ onImageSelect }) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images", // Fixed: Changed from MediaTypeOptions.Images to string 'images'
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
+      base64: false, // We don't need base64 for multipart upload
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setPickedImage(result.assets[0].uri);
-      if (onImageSelect) {
-        onImageSelect(result.assets[0].uri);
+      const selectedAsset = result.assets[0];
+
+      // Extract file extension from URI
+      const uriParts = selectedAsset.uri.split(".");
+      const fileExtension = uriParts[uriParts.length - 1].toLowerCase();
+
+      // Determine MIME type
+      let mimeType = "image/jpeg";
+      if (fileExtension === "png") {
+        mimeType = "image/png";
+      } else if (fileExtension === "jpg" || fileExtension === "jpeg") {
+        mimeType = "image/jpeg";
       }
+
+      // Create proper image data structure for React Native FormData
+      const imageData = {
+        uri: selectedAsset.uri,
+        type: mimeType,
+        name: `face_image_${Date.now()}.${fileExtension}`,
+        width: selectedAsset.width,
+        height: selectedAsset.height,
+        fileSize: selectedAsset.fileSize || selectedAsset.size,
+      };
+
+      console.log("📸 Image selected with complete details:", {
+        ...imageData,
+        sizeInKB: imageData.fileSize
+          ? Math.round(imageData.fileSize / 1024)
+          : "Unknown",
+      });
+
+      setPickedImage(selectedAsset.uri);
+      if (onImageSelect) {
+        onImageSelect(selectedAsset.uri, imageData); // Pass complete image data
+      }
+    } else {
+      console.log("📸 Image selection cancelled");
     }
   };
 
   const removeImage = () => {
+    console.log("📸 Removing selected image");
     setPickedImage(null);
     if (onImageSelect) {
-      onImageSelect(null);
+      onImageSelect(null, null);
     }
   };
 
@@ -45,7 +80,6 @@ export default function ImagePreview({ onImageSelect }) {
       <View className="items-center justify-center my-6 px-8 rounded-xl">
         <View className="relative">
           {/* Gradient glow around image */}
-
           <GradientView
             direction="diagonal"
             preset="logoGradient"
@@ -68,6 +102,11 @@ export default function ImagePreview({ onImageSelect }) {
             <Ionicons name="close" size={24} color={Colors.textSecondary} />
           </TouchableOpacity>
         </View>
+
+        {/* Image info */}
+        <Text className="text-center text-textSecondary mt-3 text-sm">
+          Photo ready for analysis
+        </Text>
       </View>
     );
   }
@@ -86,7 +125,7 @@ export default function ImagePreview({ onImageSelect }) {
           <Ionicons name="camera-outline" size={42} color={Colors.textLight} />
         </GradientView>
 
-        <Text className="text-center text-textSecondary  mb-12">
+        <Text className="text-center text-textSecondary mb-12">
           Upload a clear photo of your face{"\n"}for AI analysis
         </Text>
       </TouchableOpacity>

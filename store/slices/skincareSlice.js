@@ -26,6 +26,10 @@ const initialState = {
   isFormSubmitted: false,
   lastSubmissionTime: null,
 
+  // Image submission state
+  isImageSubmitted: false,
+  lastImageSubmissionTime: null,
+
   // Error handling
   errors: {
     form: null,
@@ -118,6 +122,7 @@ const skincareSlice = createSlice({
     clearImageData: (state) => {
       state.imageData = null;
       state.errors.image = null;
+      state.isImageSubmitted = false;
     },
 
     clearAnalysisResults: (state) => {
@@ -166,6 +171,25 @@ const skincareSlice = createSlice({
       (state, action) => {
         state.errors.form = action.payload?.message || "Form submission failed";
         state.isFormSubmitted = false;
+      }
+    );
+
+    // Handle image analysis results
+    builder.addMatcher(
+      skincareApi.endpoints.submitImageAnalysis.matchFulfilled,
+      (state, action) => {
+        state.isImageSubmitted = true;
+        state.lastImageSubmissionTime = Date.now();
+        state.errors.image = null;
+        state.analysisResults = action.payload;
+      }
+    );
+
+    builder.addMatcher(
+      skincareApi.endpoints.submitImageAnalysis.matchRejected,
+      (state, action) => {
+        state.errors.image = action.payload?.message || "Image analysis failed";
+        state.isImageSubmitted = false;
       }
     );
   },
