@@ -17,6 +17,7 @@ import BudgetScreen from "./screens/Major_Screens/BudgetScreen";
 import SkinProfileScreen from "./screens/Minor_Screens/Home/SkinProfileScreen";
 import ScanFaceScreen from "./screens/Minor_Screens/Home/ScanFaceScreen";
 import ResultScreen from "./screens/Minor_Screens/Home/ResultScreen";
+import ProductScreen from "./screens/Minor_Screens/Products/ProductScreen";
 import Colors from "./constants/colors";
 import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
 import CommunityScreen from "./screens/Major_Screens/CommunityScreen";
@@ -99,6 +100,55 @@ function HomeStackNavigator() {
   );
 }
 
+function ProductsStackNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={({ navigation, route }) => ({
+        headerShown: true,
+        animation: "slide_from_right",
+        headerLeft: () => null,
+        headerRight: () => {
+          if (route.name === "Result" || route.name === "MainHome") return null;
+          return navigation.canGoBack() ? (
+            <Pressable
+              onPress={() => navigation.goBack()}
+              style={{ marginRight: 15 }}
+              android_ripple={{
+                color: Colors.primary200,
+                borderless: true,
+              }}
+            >
+              <GradientIcon
+                name="exit"
+                size={28}
+                focused={true}
+                style={{ transform: [{ rotate: "180deg" }] }}
+              />
+            </Pressable>
+          ) : null;
+        },
+      })}
+    >
+      <Stack.Screen
+        name="MainProducts"
+        component={ProductsScreen}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Recommendations"} />,
+          headerBackVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="Product"
+        component={ProductScreen}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Recommendation"} />,
+          headerBackVisible: false,
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -147,11 +197,9 @@ export default function App() {
             />
             <Tab.Screen
               name="Products"
-              component={ProductsScreen}
+              component={ProductsStackNavigator}
               options={{
-                headerTitle: () => (
-                  <GradientHeaderTitle title={"Recommendations"} />
-                ),
+                headerShown: false,
                 tabBarIcon: ({ focused }) => (
                   <GradientIcon name={"cube"} size={28} focused={focused} />
                 ),
@@ -159,6 +207,17 @@ export default function App() {
                   <TabBarLabel text={"Products"} focused={focused} />
                 ),
               }}
+              // options={{
+              //   headerTitle: () => (
+              //     <GradientHeaderTitle title={"Recommendations"} />
+              //   ),
+              //   tabBarIcon: ({ focused }) => (
+              //     <GradientIcon name={"cube"} size={28} focused={focused} />
+              //   ),
+              //   tabBarLabel: ({ focused }) => (
+              //     <TabBarLabel text={"Products"} focused={focused} />
+              //   ),
+              // }}
             />
             <Tab.Screen
               name="Routine"
@@ -190,7 +249,7 @@ export default function App() {
                 ),
               }}
             />
-            <Tab.Screen
+            {/* <Tab.Screen
               name="Community"
               component={CommunityScreen}
               options={{
@@ -202,7 +261,7 @@ export default function App() {
                   <TabBarLabel text={"Community"} focused={focused} />
                 ),
               }}
-            />
+            /> */}
           </Tab.Navigator>
           {/* <ChatFAB /> */}
         </NavigationContainer>
