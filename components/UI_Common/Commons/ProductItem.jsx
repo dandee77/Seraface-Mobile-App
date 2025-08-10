@@ -2,6 +2,7 @@ import { View, Text, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../../constants/colors";
 import { GradientView } from "../Gradients/GradientView";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ProductItem({
   title,
@@ -12,11 +13,46 @@ export default function ProductItem({
   priorityLevel,
   image,
   onProductClick,
+  productData, // Add this prop for full product data
 }) {
+  const navigation = useNavigation();
+
+  const handleProductPress = () => {
+    if (onProductClick) {
+      onProductClick();
+    } else {
+      // Navigate to ProductScreen with product data
+      navigation.navigate("Product", {
+        productData: productData || {
+          product_data: {
+            title,
+            price: `₱${price}`,
+            thumbnail: image,
+            rating: 4.5,
+            reviews: 100,
+            store: "Online Store",
+            product_link: "https://example.com",
+            detailed_description: description,
+            media: [{ type: "image", link: image }],
+          },
+          recommendation_context: {
+            category: subtitle?.toLowerCase() || "skincare",
+            ai_recommended: true,
+            user_context: {
+              skin_type: ["combination"],
+              skin_conditions: ["acne", "oily skin"],
+              goals: ["clear skin", "oil control"],
+            },
+          },
+        },
+      });
+    }
+  };
+
   return (
     <View className="my-3 overflow-hidden bg-background rounded-2xl relative">
       <Pressable
-        onPress={onProductClick}
+        onPress={handleProductPress}
         android_ripple={{ color: Colors.primary100 }}
         className="flex-row"
       >
