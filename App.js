@@ -141,12 +141,13 @@ function ProductsStackNavigator() {
           headerTitle: () => <GradientHeaderTitle title={"Recommendations"} />,
           headerBackVisible: false,
         }}
+        initialParams={{ recommendations: null, sessionId: null }}
       />
       <Stack.Screen
         name="Product"
         component={ProductScreen}
         options={{
-          headerTitle: () => <GradientHeaderTitle title={"Recommendation"} />,
+          headerTitle: () => <GradientHeaderTitle title={"Product Details"} />,
           headerBackVisible: false,
         }}
       />

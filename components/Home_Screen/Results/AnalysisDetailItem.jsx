@@ -7,7 +7,28 @@ export default function AnalysisDetailItem({ detail }) {
 
   // Helper function to capitalize first letter
   const capitalize = (str) => {
+    if (!str || typeof str !== "string") return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  // Helper function to process locations - handle both string and array
+  const processLocations = (locations) => {
+    if (!locations) return [];
+
+    // If it's already an array, return it
+    if (Array.isArray(locations)) {
+      return locations.filter((loc) => loc && loc.trim() !== "");
+    }
+
+    // If it's a string, split by comma and clean up
+    if (typeof locations === "string") {
+      return locations
+        .split(",")
+        .map((loc) => loc.trim())
+        .filter((loc) => loc !== "");
+    }
+
+    return [];
   };
 
   // Determine value color based on content
@@ -31,6 +52,8 @@ export default function AnalysisDetailItem({ detail }) {
     return "text-textPrimary";
   };
 
+  const processedLocations = processLocations(locations);
+
   return (
     <View className="mb-2">
       <View className="flex-row justify-between">
@@ -40,9 +63,10 @@ export default function AnalysisDetailItem({ detail }) {
         </Text>
       </View>
 
-      {locations && locations.length > 0 && (
+      {/* Display locations only if they exist and have content */}
+      {processedLocations.length > 0 && (
         <View className="flex-row flex-wrap mt-1">
-          {locations.map((location, idx) => (
+          {processedLocations.map((location, idx) => (
             <View key={idx} className="mr-1 mb-1 overflow-hidden rounded-full">
               <GradientView preset="lightPurple" className="rounded-full">
                 <Text className="text-textLight text-xs py-1 px-2">

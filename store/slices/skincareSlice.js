@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { skincareApi } from "../api/skincareApi";
 
 const initialState = {
-  // Form data matching backend structure
+  // Form data matching backend structure (EXISTING - DON'T CHANGE)
   formData: {
     skin_type: [],
     skin_conditions: [],
@@ -13,24 +13,32 @@ const initialState = {
     custom_goal: "",
   },
 
-  // Image data
+  // Image data (EXISTING - DON'T CHANGE)
   imageData: null,
 
-  // Analysis results
+  // Analysis results (EXISTING - DON'T CHANGE)
   analysisResults: null,
 
-  // Recommendations
-  recommendations: [],
+  // Product Recommendations (FIXED)
+  recommendations: {
+    allocation: {},
+    products: {},
+    total_budget: null,
+    future_recommendations: [],
+    isLoading: false,
+    error: null,
+    lastFetchTime: null,
+  },
 
-  // Form submission state
+  // Form submission state (EXISTING - DON'T CHANGE)
   isFormSubmitted: false,
   lastSubmissionTime: null,
 
-  // Image submission state
+  // Image submission state (EXISTING - DON'T CHANGE)
   isImageSubmitted: false,
   lastImageSubmissionTime: null,
 
-  // Error handling
+  // Error handling (EXISTING - DON'T CHANGE)
   errors: {
     form: null,
     image: null,
@@ -42,9 +50,10 @@ const skincareSlice = createSlice({
   name: "skincare",
   initialState,
   reducers: {
+    // Existing reducers (DON'T CHANGE THESE)
     updateFormData: (state, action) => {
       state.formData = { ...state.formData, ...action.payload };
-      state.errors.form = null; // Clear form errors when updating
+      state.errors.form = null;
     },
 
     setSkinType: (state, action) => {
@@ -129,6 +138,28 @@ const skincareSlice = createSlice({
       state.analysisResults = null;
     },
 
+    // NEW: Recommendation management actions
+    clearRecommendations: (state) => {
+      state.recommendations = {
+        allocation: {},
+        products: {},
+        total_budget: null,
+        future_recommendations: [],
+        isLoading: false,
+        error: null,
+        lastFetchTime: null,
+      };
+    },
+
+    setRecommendationsLoading: (state, action) => {
+      state.recommendations.isLoading = action.payload;
+    },
+
+    setRecommendationsError: (state, action) => {
+      state.recommendations.error = action.payload;
+      state.recommendations.isLoading = false;
+    },
+
     clearAllData: (state) => {
       return initialState;
     },
@@ -151,7 +182,7 @@ const skincareSlice = createSlice({
   },
 
   extraReducers: (builder) => {
-    // Handle form analysis results
+    // Handle form analysis results (EXISTING - DON'T CHANGE)
     builder.addMatcher(
       skincareApi.endpoints.submitFormAnalysis.matchFulfilled,
       (state, action) => {
@@ -159,7 +190,6 @@ const skincareSlice = createSlice({
         state.lastSubmissionTime = Date.now();
         state.errors.form = null;
 
-        // Update form data with server response if needed
         if (action.payload.data) {
           state.formData = { ...state.formData, ...action.payload.data };
         }
@@ -174,7 +204,7 @@ const skincareSlice = createSlice({
       }
     );
 
-    // Handle image analysis results
+    // Handle image analysis results (EXISTING - DON'T CHANGE)
     builder.addMatcher(
       skincareApi.endpoints.submitImageAnalysis.matchFulfilled,
       (state, action) => {
@@ -190,6 +220,55 @@ const skincareSlice = createSlice({
       (state, action) => {
         state.errors.image = action.payload?.message || "Image analysis failed";
         state.isImageSubmitted = false;
+      }
+    );
+
+    // Handle product recommendations (FIXED)
+    builder.addMatcher(
+      skincareApi.endpoints.getProductRecommendations.matchPending,
+      (state) => {
+        state.recommendations.isLoading = true;
+        state.recommendations.error = null;
+      }
+    );
+
+    builder.addMatcher(
+      skincareApi.endpoints.getProductRecommendations.matchFulfilled,
+      (state, action) => {
+        state.recommendations.isLoading = false;
+        state.recommendations.error = null;
+        state.recommendations.lastFetchTime = Date.now();
+
+        // FIXED: Properly serialize the data to avoid Immer errors
+        const payload = action.payload;
+
+        // Safely assign allocation (ensure it's a plain object)
+        state.recommendations.allocation = payload.allocation
+          ? JSON.parse(JSON.stringify(payload.allocation))
+          : {};
+
+        // Safely assign products (ensure it's a plain object)
+        state.recommendations.products = payload.products
+          ? JSON.parse(JSON.stringify(payload.products))
+          : {};
+
+        // Assign primitive values directly
+        state.recommendations.total_budget = payload.total_budget || null;
+
+        // Safely assign future recommendations (ensure it's a plain array)
+        state.recommendations.future_recommendations =
+          payload.future_recommendations
+            ? JSON.parse(JSON.stringify(payload.future_recommendations))
+            : [];
+      }
+    );
+
+    builder.addMatcher(
+      skincareApi.endpoints.getProductRecommendations.matchRejected,
+      (state, action) => {
+        state.recommendations.isLoading = false;
+        state.recommendations.error =
+          action.payload?.message || "Failed to get recommendations";
       }
     );
   },
@@ -212,6 +291,9 @@ export const {
   clearFormData,
   clearImageData,
   clearAnalysisResults,
+  clearRecommendations,
+  setRecommendationsLoading,
+  setRecommendationsError,
   clearAllData,
   setError,
   clearError,

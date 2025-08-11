@@ -8,7 +8,7 @@ export const skincareApi = createApi({
   baseQuery,
   tagTypes: ["FormAnalysis", "ImageAnalysis", "Recommendations"],
   endpoints: (builder) => ({
-    // Phase 1: Form Analysis
+    // Phase 1: Form Analysis (EXISTING - DON'T CHANGE)
     submitFormAnalysis: builder.mutation({
       query: (formData) => {
         console.log("📤 Submitting form data:", formData);
@@ -34,7 +34,7 @@ export const skincareApi = createApi({
       },
     }),
 
-    // Phase 2: Image Analysis - CORRECTED VERSION
+    // Phase 2: Image Analysis (EXISTING - DON'T CHANGE)
     submitImageAnalysis: builder.mutation({
       query: ({ imageFile, sessionId }) => {
         console.log("📸 Preparing image analysis request:", {
@@ -47,10 +47,8 @@ export const skincareApi = createApi({
           },
         });
 
-        // Create FormData for the file upload
         const formData = new FormData();
 
-        // Append the file with the exact format React Native expects
         formData.append("file", {
           uri: imageFile.uri,
           type: imageFile.type || "image/jpeg",
@@ -64,11 +62,9 @@ export const skincareApi = createApi({
         });
 
         return {
-          // Session ID goes in query parameters as shown in your Swagger UI
           url: `/api/v1/skincare/phase2/image-analysis?session_id=${encodeURIComponent(sessionId)}`,
           method: "POST",
           body: formData,
-          // Let the browser set the Content-Type with boundary for multipart/form-data
         };
       },
       invalidatesTags: ["ImageAnalysis"],
@@ -88,10 +84,47 @@ export const skincareApi = createApi({
       },
     }),
 
-    // Get recommendations (for future implementation)
-    getRecommendations: builder.query({
-      query: (sessionId) => `/api/v1/skincare/recommendations/${sessionId}`,
+    // Phase 3: Product Recommendations (NEW)
+    getProductRecommendations: builder.mutation({
+      query: (sessionId) => {
+        console.log(
+          "🛍️ Fetching product recommendations for session:",
+          sessionId
+        );
+
+        return {
+          url: `/api/v1/skincare/phase3/product-recommendations?session_id=${encodeURIComponent(sessionId)}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
+      invalidatesTags: ["Recommendations"],
+      transformResponse: (response) => {
+        console.log("🛍️ Product Recommendations Response:", response);
+        return response;
+      },
+      transformErrorResponse: (response) => {
+        console.error("❌ Product Recommendations Error:", response);
+        return {
+          status: response.status,
+          message: response.data?.message || "Failed to get recommendations",
+          data: response.data,
+          details: response.data?.detail,
+        };
+      },
+    }),
+
+    // Alternative Query version (if you prefer using query instead of mutation)
+    getRecommendationsQuery: builder.query({
+      query: (sessionId) =>
+        `/api/v1/skincare/phase3/product-recommendations?session_id=${encodeURIComponent(sessionId)}`,
       providesTags: ["Recommendations"],
+      transformResponse: (response) => {
+        console.log("🛍️ Product Recommendations Query Response:", response);
+        return response;
+      },
     }),
   }),
 });
@@ -99,5 +132,6 @@ export const skincareApi = createApi({
 export const {
   useSubmitFormAnalysisMutation,
   useSubmitImageAnalysisMutation,
-  useGetRecommendationsQuery,
+  useGetProductRecommendationsMutation,
+  useGetRecommendationsQueryQuery,
 } = skincareApi;

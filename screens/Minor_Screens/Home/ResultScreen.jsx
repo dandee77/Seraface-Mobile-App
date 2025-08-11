@@ -1,13 +1,18 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import { GradientText } from "../../../components/UI_Common/Gradients/GradientText";
 import NextButton from "../../../components/UI_Common/Buttons/NextButton";
 import AnalysisResultItem from "../../../components/Home_Screen/Results/AnalysisResultItem";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+
+// Import the new recommendations mutation
+import { useGetProductRecommendationsMutation } from "../../../store/api/skincareApi";
+import { setRecommendationsError } from "../../../store/slices/skincareSlice";
 
 export default function ResultScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
   const imageUri = route.params?.imageUri;
   const routeAnalysisData = route.params?.analysisData;
 
@@ -15,6 +20,16 @@ export default function ResultScreen({ navigation, route }) {
   const reduxAnalysisData = useSelector(
     (state) => state.skincare.analysisResults
   );
+  const sessionId = useSelector((state) => state.auth.sessionId);
+  const recommendations = useSelector(
+    (state) => state.skincare.recommendations
+  );
+
+  // RTK Query mutation for getting recommendations
+  const [
+    getProductRecommendations,
+    { isLoading: isLoadingRecommendations, error: recommendationsError },
+  ] = useGetProductRecommendationsMutation();
 
   // Use data from route params or Redux store
   const analysisData = routeAnalysisData || reduxAnalysisData;
@@ -70,6 +85,43 @@ export default function ResultScreen({ navigation, route }) {
   // Use real data if available, otherwise use mock data
   const finalAnalysisData = analysisData || mockAnalysisData;
 
+  // Automatically fetch recommendations when component mounts
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (sessionId && analysisData) {
+        console.log("🛍️ Automatically fetching product recommendations...");
+        try {
+          await getProductRecommendations(sessionId).unwrap();
+          console.log("✅ Product recommendations fetched successfully");
+        } catch (error) {
+          console.error("❌ Failed to fetch product recommendations:", error);
+          dispatch(
+            setRecommendationsError(
+              error.message || "Failed to fetch recommendations"
+            )
+          );
+        }
+      }
+    };
+
+    // Fetch recommendations after a short delay to ensure UI is rendered
+    const timer = setTimeout(fetchRecommendations, 1000);
+    return () => clearTimeout(timer);
+  }, [sessionId, analysisData, getProductRecommendations, dispatch]);
+
+  // Handle recommendation errors
+  useEffect(() => {
+    if (recommendationsError) {
+      console.error("❌ Recommendations error:", recommendationsError);
+      Alert.alert(
+        "Recommendations Error",
+        recommendationsError.message ||
+          "Failed to get product recommendations. You can still view manual recommendations.",
+        [{ text: "OK" }]
+      );
+    }
+  }, [recommendationsError]);
+
   // Log the data source for debugging
   useEffect(() => {
     if (analysisData) {
@@ -81,8 +133,20 @@ export default function ResultScreen({ navigation, route }) {
 
   // Helper function to format array locations
   const formatLocations = (locations) => {
-    if (!locations || locations.length === 0) return null;
-    return locations.join(", ");
+    if (!locations) return null;
+
+    // If it's already an array, filter out empty values
+    if (Array.isArray(locations)) {
+      const filtered = locations.filter((loc) => loc && loc.trim() !== "");
+      return filtered.length > 0 ? filtered : null;
+    }
+
+    // If it's a string, return as single-item array
+    if (typeof locations === "string" && locations.trim() !== "") {
+      return [locations.trim()];
+    }
+
+    return null;
   };
 
   // Helper function to format presence values
@@ -207,12 +271,25 @@ export default function ResultScreen({ navigation, route }) {
   ];
 
   const handleExportData = () => {
-    // In a real app, this would handle exporting analysis data
     console.log("Exporting face data analysis", finalAnalysisData.session_id);
   };
 
   const handleViewRecommendations = () => {
-    navigation.navigate("Products");
+    // Pass recommendations data to ProductsScreen via navigation params
+    navigation.navigate("Products", {
+      recommendations: recommendations.products ? recommendations : null,
+      sessionId: sessionId,
+    });
+  };
+
+  const handleRetryRecommendations = async () => {
+    if (sessionId) {
+      try {
+        await getProductRecommendations(sessionId).unwrap();
+      } catch (error) {
+        console.error("❌ Retry failed:", error);
+      }
+    }
   };
 
   return (
@@ -249,7 +326,7 @@ export default function ResultScreen({ navigation, route }) {
           ))}
         </View>
 
-        {/* Status Section */}
+        {/* Recommendations Status Section */}
         <View className="bg-white p-4 rounded-xl mb-6">
           <Text className="text-textSecondary mb-1">
             Analysis Status:{" "}
@@ -257,12 +334,40 @@ export default function ResultScreen({ navigation, route }) {
               {finalAnalysisData.status}
             </Text>
           </Text>
-          <Text className="text-textSecondary">
+          <Text className="text-textSecondary mb-2">
             Next:{" "}
             <Text className="text-primary-600 font-medium">
               {finalAnalysisData.next_phase}
             </Text>
           </Text>
+
+          {/* Recommendations Loading/Status */}
+          {isLoadingRecommendations && (
+            <Text className="text-info-600 text-sm mt-2">
+              🔄 Getting your personalized recommendations...
+            </Text>
+          )}
+
+          {recommendations.products && !isLoadingRecommendations && (
+            <Text className="text-success-600 text-sm mt-2">
+              ✅ Personalized recommendations ready!
+            </Text>
+          )}
+
+          {recommendations.error && !isLoadingRecommendations && (
+            <View className="mt-2">
+              <Text className="text-error-600 text-sm">
+                ❌ {recommendations.error}
+              </Text>
+              <NextButton
+                text="Retry Recommendations"
+                icon="refresh-outline"
+                onPress={handleRetryRecommendations}
+                style={{ marginTop: 8 }}
+              />
+            </View>
+          )}
+
           {!analysisData && (
             <Text className="text-warning-600 text-sm mt-2">
               ⚠️ Using mock data - backend not connected
@@ -279,9 +384,18 @@ export default function ResultScreen({ navigation, route }) {
           />
 
           <NextButton
-            text="View Recommendations"
-            icon="arrow-forward-outline"
+            text={
+              isLoadingRecommendations
+                ? "Loading Recommendations..."
+                : "View Recommendations"
+            }
+            icon={
+              isLoadingRecommendations
+                ? "hourglass-outline"
+                : "arrow-forward-outline"
+            }
             onPress={handleViewRecommendations}
+            disabled={isLoadingRecommendations}
           />
         </View>
 
@@ -294,6 +408,15 @@ export default function ResultScreen({ navigation, route }) {
             <Text className="text-sm text-gray-600">
               Data Source: {analysisData ? "Backend" : "Mock"}
             </Text>
+            <Text className="text-sm text-gray-600">
+              Recommendations:{" "}
+              {recommendations.products ? "Loaded" : "Not loaded"}
+            </Text>
+            {recommendations.total_budget && (
+              <Text className="text-sm text-gray-600">
+                Budget: {recommendations.total_budget}
+              </Text>
+            )}
           </View>
         )}
       </View>
