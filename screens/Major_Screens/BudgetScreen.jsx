@@ -1,19 +1,23 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import TitleContainer from "../../components/UI_Common/Commons/TitleContainer";
 import BudgetContainer from "../../components/Budget_Screen/BudgetContainer";
 import RoadmapContainer from "../../components/Budget_Screen/RoadmapContainer";
 import ProductItem from "../../components/UI_Common/Commons/ProductItem";
 import NextButton from "../../components/UI_Common/Buttons/NextButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useGetRoutineCreationMutation } from "../../store/api/skincareApi";
+import { setRoutinesError } from "../../store/slices/skincareSlice";
 
 const BudgetScreen = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
 
   // Get recommendations from route params or Redux store
   const routeRecommendations = route.params?.recommendations;
-  const sessionId = route.params?.sessionId;
+  const sessionId =
+    route.params?.sessionId || useSelector((state) => state.auth.sessionId);
   const reduxRecommendations = useSelector(
     (state) => state.skincare.recommendations
   );
@@ -28,6 +32,49 @@ const BudgetScreen = ({ navigation, route }) => {
 
   const [budget, setBudget] = useState(defaultBudget);
   const [futureProducts, setFutureProducts] = useState([]);
+
+  // RTK Query hook for routine creation
+  const [
+    getRoutineCreation,
+    { isLoading: isLoadingRoutine, error: routineError },
+  ] = useGetRoutineCreationMutation();
+
+  // Automatically fetch routine creation when component mounts
+  useEffect(() => {
+    const fetchRoutineCreation = async () => {
+      if (sessionId) {
+        console.log("🗓️ Automatically fetching skincare routine...");
+        try {
+          await getRoutineCreation(sessionId).unwrap();
+          console.log("✅ Routine creation fetched successfully");
+        } catch (error) {
+          console.error("❌ Failed to fetch routine creation:", error);
+          dispatch(
+            setRoutinesError(
+              error.message || "Failed to fetch routine creation"
+            )
+          );
+        }
+      }
+    };
+
+    // Fetch routine after a short delay to ensure UI is rendered
+    const timer = setTimeout(fetchRoutineCreation, 1000);
+    return () => clearTimeout(timer);
+  }, [sessionId, getRoutineCreation, dispatch]);
+
+  // Handle routine errors
+  useEffect(() => {
+    if (routineError) {
+      console.error("❌ Routine creation error:", routineError);
+      Alert.alert(
+        "Routine Creation Error",
+        routineError.message ||
+          "Failed to create skincare routine. Please try again later.",
+        [{ text: "OK" }]
+      );
+    }
+  }, [routineError]);
 
   // Calculate spent amount based on recommended products
   const calculateSpentAmount = () => {
@@ -287,7 +334,7 @@ const BudgetScreen = ({ navigation, route }) => {
   );
 
   const handleNextButtonPressed = () => {
-    navigation.navigate("Routine");
+    navigation.navigate("Routine", { sessionId });
   };
 
   return (
@@ -313,14 +360,17 @@ const BudgetScreen = ({ navigation, route }) => {
       </View>
 
       <View
-        className="absolute bottom-0 left-0 right-0 w-full"
+        className="absolute bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200"
         style={[{ paddingBottom: Math.max(insets.bottom, 20) }]}
       >
-        <View className="px-8 w-full">
+        <View className="px-8 w-full pt-4">
           <NextButton
-            text="See Your Routine"
-            icon="arrow-forward-outline"
+            text={
+              isLoadingRoutine ? "Creating Your Routine..." : "See Your Routine"
+            }
+            icon={isLoadingRoutine ? "time-outline" : "arrow-forward-outline"}
             onPress={handleNextButtonPressed}
+            disabled={isLoadingRoutine}
           />
         </View>
       </View>
@@ -336,6 +386,10 @@ const BudgetScreen = ({ navigation, route }) => {
           </Text>
           <Text className="text-white text-xs">
             Future Products: {futureProducts.length}
+          </Text>
+          <Text className="text-white text-xs">
+            Routine:{" "}
+            {isLoadingRoutine ? "Loading..." : routineError ? "❌" : "✅"}
           </Text>
           {sessionId && (
             <Text className="text-white text-xs">

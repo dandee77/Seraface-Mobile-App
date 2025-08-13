@@ -6,7 +6,7 @@ console.log("🌐 API Base URL configured");
 export const skincareApi = createApi({
   reducerPath: "skincareApi",
   baseQuery,
-  tagTypes: ["FormAnalysis", "ImageAnalysis", "Recommendations"],
+  tagTypes: ["FormAnalysis", "ImageAnalysis", "Recommendations", "Routines"],
   endpoints: (builder) => ({
     // Phase 1: Form Analysis (EXISTING - DON'T CHANGE)
     submitFormAnalysis: builder.mutation({
@@ -84,7 +84,7 @@ export const skincareApi = createApi({
       },
     }),
 
-    // Phase 3: Product Recommendations (NEW)
+    // Phase 3: Product Recommendations (EXISTING - DON'T CHANGE)
     getProductRecommendations: builder.mutation({
       query: (sessionId) => {
         console.log(
@@ -116,13 +116,51 @@ export const skincareApi = createApi({
       },
     }),
 
-    // Alternative Query version (if you prefer using query instead of mutation)
     getRecommendationsQuery: builder.query({
       query: (sessionId) =>
         `/api/v1/skincare/phase3/product-recommendations?session_id=${encodeURIComponent(sessionId)}`,
       providesTags: ["Recommendations"],
       transformResponse: (response) => {
         console.log("🛍️ Product Recommendations Query Response:", response);
+        return response;
+      },
+    }),
+
+    // Phase 4: Routine Creation (NEW)
+    getRoutineCreation: builder.mutation({
+      query: (sessionId) => {
+        console.log("🗓️ Fetching skincare routine for session:", sessionId);
+
+        return {
+          url: `/api/v1/skincare/phase4/routine-creation?session_id=${encodeURIComponent(sessionId)}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+      },
+      invalidatesTags: ["Routines"],
+      transformResponse: (response) => {
+        console.log("🗓️ Routine Creation Response:", response);
+        return response;
+      },
+      transformErrorResponse: (response) => {
+        console.error("❌ Routine Creation Error:", response);
+        return {
+          status: response.status,
+          message: response.data?.message || "Failed to create routine",
+          data: response.data,
+          details: response.data?.detail,
+        };
+      },
+    }),
+
+    getRoutineQuery: builder.query({
+      query: (sessionId) =>
+        `/api/v1/skincare/phase4/routine-creation?session_id=${encodeURIComponent(sessionId)}`,
+      providesTags: ["Routines"],
+      transformResponse: (response) => {
+        console.log("🗓️ Routine Query Response:", response);
         return response;
       },
     }),
@@ -134,4 +172,6 @@ export const {
   useSubmitImageAnalysisMutation,
   useGetProductRecommendationsMutation,
   useGetRecommendationsQueryQuery,
+  useGetRoutineCreationMutation,
+  useGetRoutineQueryQuery,
 } = skincareApi;

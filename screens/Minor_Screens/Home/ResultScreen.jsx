@@ -275,7 +275,7 @@ export default function ResultScreen({ navigation, route }) {
   };
 
   const handleViewRecommendations = () => {
-    // Pass recommendations data to ProductsScreen via navigation params
+    // Pass recommendations data and sessionId to ProductsScreen via navigation params
     navigation.navigate("Products", {
       recommendations: recommendations.products ? recommendations : null,
       sessionId: sessionId,

@@ -19,12 +19,21 @@ const initialState = {
   // Analysis results (EXISTING - DON'T CHANGE)
   analysisResults: null,
 
-  // Product Recommendations (FIXED)
+  // Product Recommendations (EXISTING - DON'T CHANGE)
   recommendations: {
     allocation: {},
     products: {},
     total_budget: null,
     future_recommendations: [],
+    isLoading: false,
+    error: null,
+    lastFetchTime: null,
+  },
+
+  // Routine Creation (NEW)
+  routines: {
+    product_type: null,
+    routine: [],
     isLoading: false,
     error: null,
     lastFetchTime: null,
@@ -38,7 +47,7 @@ const initialState = {
   isImageSubmitted: false,
   lastImageSubmissionTime: null,
 
-  // Error handling (EXISTING - DON'T CHANGE)
+  // Errors (EXISTING - DON'T CHANGE)
   errors: {
     form: null,
     image: null,
@@ -50,16 +59,13 @@ const skincareSlice = createSlice({
   name: "skincare",
   initialState,
   reducers: {
-    // Existing reducers (DON'T CHANGE THESE)
+    // Existing reducers (DO NOT CHANGE)
     updateFormData: (state, action) => {
       state.formData = { ...state.formData, ...action.payload };
-      state.errors.form = null;
     },
 
     setSkinType: (state, action) => {
-      state.formData.skin_type = Array.isArray(action.payload)
-        ? action.payload
-        : [action.payload];
+      state.formData.skin_type = action.payload;
     },
 
     addSkinCondition: (state, action) => {
@@ -99,13 +105,15 @@ const skincareSlice = createSlice({
     },
 
     addProductExperience: (state, action) => {
-      state.formData.product_experiences.push(action.payload);
+      if (!state.formData.product_experiences.includes(action.payload)) {
+        state.formData.product_experiences.push(action.payload);
+      }
     },
 
     removeProductExperience: (state, action) => {
       state.formData.product_experiences =
         state.formData.product_experiences.filter(
-          (_, index) => index !== action.payload
+          (experience) => experience !== action.payload
         );
     },
 
@@ -138,7 +146,7 @@ const skincareSlice = createSlice({
       state.analysisResults = null;
     },
 
-    // NEW: Recommendation management actions
+    // Recommendation management actions (EXISTING - DON'T CHANGE)
     clearRecommendations: (state) => {
       state.recommendations = {
         allocation: {},
@@ -160,6 +168,36 @@ const skincareSlice = createSlice({
       state.recommendations.isLoading = false;
     },
 
+    // Routine management actions (FIXED)
+    clearRoutines: (state) => {
+      // Ensure routines exists before clearing it
+      state.routines = {
+        product_type: null,
+        routine: [],
+        isLoading: false,
+        error: null,
+        lastFetchTime: null,
+      };
+    },
+
+    setRoutinesLoading: (state, action) => {
+      // Ensure routines exists before setting isLoading
+      if (!state.routines) {
+        state.routines = { ...initialState.routines };
+      }
+      state.routines.isLoading = action.payload;
+    },
+
+    setRoutinesError: (state, action) => {
+      // Ensure routines exists before setting error
+      if (!state.routines) {
+        state.routines = { ...initialState.routines };
+      }
+      state.routines.error = action.payload;
+      state.routines.isLoading = false;
+    },
+
+    // General actions (EXISTING - DON'T CHANGE)
     clearAllData: (state) => {
       return initialState;
     },
@@ -223,7 +261,7 @@ const skincareSlice = createSlice({
       }
     );
 
-    // Handle product recommendations (FIXED)
+    // Handle product recommendations (EXISTING - DON'T CHANGE)
     builder.addMatcher(
       skincareApi.endpoints.getProductRecommendations.matchPending,
       (state) => {
@@ -239,7 +277,7 @@ const skincareSlice = createSlice({
         state.recommendations.error = null;
         state.recommendations.lastFetchTime = Date.now();
 
-        // FIXED: Properly serialize the data to avoid Immer errors
+        // Safely assign payload data
         const payload = action.payload;
 
         // Safely assign allocation (ensure it's a plain object)
@@ -271,6 +309,58 @@ const skincareSlice = createSlice({
           action.payload?.message || "Failed to get recommendations";
       }
     );
+
+    // Handle routine creation (FIXED)
+    builder.addMatcher(
+      skincareApi.endpoints.getRoutineCreation.matchPending,
+      (state) => {
+        // Ensure routines exists before setting properties
+        if (!state.routines) {
+          state.routines = { ...initialState.routines };
+        }
+        state.routines.isLoading = true;
+        state.routines.error = null;
+      }
+    );
+
+    builder.addMatcher(
+      skincareApi.endpoints.getRoutineCreation.matchFulfilled,
+      (state, action) => {
+        // Ensure routines exists before setting properties
+        if (!state.routines) {
+          state.routines = { ...initialState.routines };
+        }
+
+        state.routines.isLoading = false;
+        state.routines.error = null;
+        state.routines.lastFetchTime = Date.now();
+
+        // Safely assign payload data
+        const payload = action.payload;
+
+        // Assign product_type
+        state.routines.product_type = payload.product_type || null;
+
+        // Safely assign routines (ensure it's a plain array)
+        state.routines.routine = payload.routine
+          ? JSON.parse(JSON.stringify(payload.routine))
+          : [];
+      }
+    );
+
+    builder.addMatcher(
+      skincareApi.endpoints.getRoutineCreation.matchRejected,
+      (state, action) => {
+        // Ensure routines exists before setting properties
+        if (!state.routines) {
+          state.routines = { ...initialState.routines };
+        }
+
+        state.routines.isLoading = false;
+        state.routines.error =
+          action.payload?.message || "Failed to create routine";
+      }
+    );
   },
 });
 
@@ -294,6 +384,9 @@ export const {
   clearRecommendations,
   setRecommendationsLoading,
   setRecommendationsError,
+  clearRoutines,
+  setRoutinesLoading,
+  setRoutinesError,
   clearAllData,
   setError,
   clearError,
