@@ -144,7 +144,7 @@ const ProductsScreen = ({ navigation, route }) => {
   }, [recommendations]);
 
   const handleNextButtonPressed = () => {
-    navigation.navigate("Routine");
+    navigation.navigate("Budget", { recommendations, sessionId });
   };
 
   // Calculate how many products we have
@@ -164,38 +164,6 @@ const ProductsScreen = ({ navigation, route }) => {
               : "Based on your skin profile and scan"
           }
         />
-
-        {/* Budget Information */}
-        {recommendations?.total_budget && (
-          <View className="bg-primary-50 p-4 rounded-xl mb-4">
-            <Text className="text-primary-700 font-medium text-center">
-              💰 Total Budget: {recommendations.total_budget}
-            </Text>
-          </View>
-        )}
-
-        {/* Allocation Information */}
-        {recommendations?.allocation &&
-          Object.keys(recommendations.allocation).length > 0 && (
-            <View className="bg-white p-4 rounded-xl mb-4 shadow-sm">
-              <Text className="text-lg font-bold mb-2">Budget Allocation</Text>
-              {Object.entries(recommendations.allocation).map(
-                ([category, amount]) => (
-                  <View
-                    key={category}
-                    className="flex-row justify-between py-1"
-                  >
-                    <Text className="text-textSecondary capitalize">
-                      {category}:
-                    </Text>
-                    <Text className="text-primary-600 font-medium">
-                      {amount}%
-                    </Text>
-                  </View>
-                )
-              )}
-            </View>
-          )}
       </View>
 
       <View className="flex-1 px-8">
@@ -203,15 +171,6 @@ const ProductsScreen = ({ navigation, route }) => {
           data={productRecommendations}
           contentInset={{ bottom: 80 }}
         />
-        {/* Future Recommendations Section */}
-        {recommendations?.future_recommendations &&
-          recommendations.future_recommendations.length > 0 && (
-            <View className="px-8 py-4 bg-gray-50">
-              <Text className="text-lg font-bold mb-3">
-                Future Recommendations
-              </Text>
-            </View>
-          )}
       </View>
 
       <View
@@ -220,7 +179,7 @@ const ProductsScreen = ({ navigation, route }) => {
       >
         <View className="px-8 w-full">
           <NextButton
-            text="See Your Routine"
+            text="View Budget Plan"
             icon="arrow-forward-outline"
             onPress={handleNextButtonPressed}
           />
