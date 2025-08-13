@@ -3,7 +3,7 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Dynamic base URL based on environment
 const getBaseUrl = () => {
   if (__DEV__) {
-    return "http://192.168.1.5:8000"; // ⚠️ CHANGE THIS TO YOUR LAPTOP'S IP
+    return "http://192.168.1.5:8000";
   } else {
     return "https://your-production-api.com";
   }

@@ -203,35 +203,16 @@ const ProductsScreen = ({ navigation, route }) => {
           data={productRecommendations}
           contentInset={{ bottom: 80 }}
         />
+        {/* Future Recommendations Section */}
+        {recommendations?.future_recommendations &&
+          recommendations.future_recommendations.length > 0 && (
+            <View className="px-8 py-4 bg-gray-50">
+              <Text className="text-lg font-bold mb-3">
+                Future Recommendations
+              </Text>
+            </View>
+          )}
       </View>
-
-      {/* Future Recommendations Section */}
-      {recommendations?.future_recommendations &&
-        recommendations.future_recommendations.length > 0 && (
-          <View className="px-8 py-4 bg-gray-50">
-            <Text className="text-lg font-bold mb-3">
-              Future Recommendations
-            </Text>
-            {recommendations.future_recommendations.map((futureRec, index) => (
-              <View
-                key={index}
-                className="bg-white p-3 rounded-xl mb-2 shadow-sm"
-              >
-                <Text className="font-medium text-primary-600 capitalize mb-1">
-                  {futureRec.category}
-                </Text>
-                {futureRec.products.map((product, productIndex) => (
-                  <Text
-                    key={productIndex}
-                    className="text-textSecondary text-sm"
-                  >
-                    • {product.name} - {product.price}
-                  </Text>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
 
       <View
         className="absolute bottom-0 left-0 right-0 w-full"
