@@ -339,13 +339,13 @@ const SkinProfileScreen = ({ navigation }) => {
         </View>
 
         {/* Debug Info (remove in production) */}
-        {__DEV__ && sessionId && (
+        {/* {__DEV__ && sessionId && (
           <View className="mt-4 p-4 bg-gray-100 rounded-xl">
             <Text className="text-sm text-gray-600">
               Debug - Session ID: {sessionId}
             </Text>
           </View>
-        )}
+        )} */}
       </View>
     </ScrollView>
   );

@@ -76,21 +76,28 @@ const BudgetScreen = ({ navigation, route }) => {
     }
   }, [routineError]);
 
-  // Calculate spent amount based on recommended products
+  // UPDATED: Calculate spent amount based on LIMITED recommended products
   const calculateSpentAmount = () => {
     if (
       recommendations?.products &&
       Object.keys(recommendations.products).length > 0
     ) {
       let total = 0;
+      // Since we're now limiting to 1 product per category, this calculation is much simpler
       Object.values(recommendations.products).forEach((products) => {
-        products.forEach((product) => {
-          total += parseFloat(product.price.replace(/[^\d.-]/g, "")) || 0;
-        });
+        if (Array.isArray(products) && products.length > 0) {
+          // Only count the first product (since we limited it)
+          const price =
+            parseFloat(products[0].price.replace(/[^\d.-]/g, "")) || 0;
+          total += price;
+        }
       });
+      console.log(
+        `💰 Calculated spent amount from ${Object.keys(recommendations.products).length} categories: ₱${total}`
+      );
       return total;
     }
-    return 792; // Fallback to mock value
+    return 607; // Fallback to mock value (reduced from 792)
   };
 
   const spentAmount = calculateSpentAmount();
@@ -99,7 +106,7 @@ const BudgetScreen = ({ navigation, route }) => {
     setBudget(newBudget);
   };
 
-  // Transform future recommendations into product items format
+  // UPDATED: Transform future recommendations with strict limits (max 2 items)
   useEffect(() => {
     if (
       recommendations?.future_recommendations &&
@@ -107,7 +114,14 @@ const BudgetScreen = ({ navigation, route }) => {
     ) {
       const transformedFutureProducts = [];
 
-      recommendations.future_recommendations.forEach((item, index) => {
+      // Limit to maximum 2 future recommendations
+      const limitedFutureRecommendations =
+        recommendations.future_recommendations.slice(0, 2);
+      console.log(
+        `📊 Processing ${limitedFutureRecommendations.length} future recommendations (limited from ${recommendations.future_recommendations.length})`
+      );
+
+      limitedFutureRecommendations.forEach((item, index) => {
         // Handle if item is an object with category and products
         if (
           typeof item === "object" &&
@@ -115,63 +129,61 @@ const BudgetScreen = ({ navigation, route }) => {
           item.products &&
           item.products.length > 0
         ) {
-          item.products.forEach((product, productIndex) => {
-            transformedFutureProducts.push({
-              title:
-                product.name || `${item.category} Product ${productIndex + 1}`,
-              subtitle:
-                item.category.charAt(0).toUpperCase() + item.category.slice(1),
-              matchPercentage: 85 + Math.floor(Math.random() * 10), // Random match 85-94%
-              description: `Future recommended ${item.category} product for your skin profile`,
-              price: parseFloat(product.price?.replace(/[^\d.-]/g, "")) || 0,
-              priorityLevel: "Medium",
-              image:
-                "https://via.placeholder.com/150x150/6B96FF/FFFFFF?text=" +
-                encodeURIComponent(
-                  (product.name || item.category).substring(0, 10)
-                ),
-              productData: {
-                product_data: {
-                  title:
-                    product.name ||
-                    `${item.category} Product ${productIndex + 1}`,
-                  price: product.price || "Price TBD",
-                  thumbnail:
-                    "https://via.placeholder.com/300x300/6B96FF/FFFFFF?text=" +
-                    encodeURIComponent(
-                      (product.name || item.category).substring(0, 10)
-                    ),
-                  rating: 4.0 + Math.random() * 0.5,
-                  reviews: Math.floor(Math.random() * 500) + 50,
-                  store: "Future Recommendation",
-                  product_link: "https://example.com/future-product",
-                  detailed_description: `This ${item.category} product is recommended for future purchase based on your skin profile analysis.`,
-                  media: [
-                    {
-                      type: "image",
-                      link:
-                        "https://via.placeholder.com/400x400/6B96FF/FFFFFF?text=" +
-                        encodeURIComponent(
-                          (product.name || item.category).substring(0, 15)
-                        ),
-                    },
-                  ],
-                },
-                recommendation_context: {
-                  category: item.category,
-                  recommended_price: product.price || "TBD",
-                  user_context: {
-                    skin_type: ["analyzed"],
-                    skin_conditions: ["analyzed"],
-                    goals: ["future improvement"],
+          // Only take the first product from future recommendations too
+          const product = item.products[0];
+
+          transformedFutureProducts.push({
+            title: product.name || `${item.category} Product`,
+            subtitle:
+              item.category.charAt(0).toUpperCase() + item.category.slice(1),
+            matchPercentage: 85 + Math.floor(Math.random() * 10), // Random match 85-94%
+            description: `Future top pick for ${item.category} in your routine`,
+            price: parseFloat(product.price?.replace(/[^\d.-]/g, "")) || 0,
+            priorityLevel: "Medium",
+            image:
+              "https://via.placeholder.com/150x150/6B96FF/FFFFFF?text=" +
+              encodeURIComponent(
+                (product.name || item.category).substring(0, 10)
+              ),
+            productData: {
+              product_data: {
+                title: product.name || `${item.category} Product`,
+                price: product.price || "Price TBD",
+                thumbnail:
+                  "https://via.placeholder.com/300x300/6B96FF/FFFFFF?text=" +
+                  encodeURIComponent(
+                    (product.name || item.category).substring(0, 10)
+                  ),
+                rating: 4.0 + Math.random() * 0.5,
+                reviews: Math.floor(Math.random() * 500) + 50,
+                store: "Future Recommendation",
+                product_link: "https://example.com/future-product",
+                detailed_description: `This ${item.category} product is recommended for future purchase to enhance your skincare routine.`,
+                media: [
+                  {
+                    type: "image",
+                    link:
+                      "https://via.placeholder.com/400x400/6B96FF/FFFFFF?text=" +
+                      encodeURIComponent(
+                        (product.name || item.category).substring(0, 15)
+                      ),
                   },
-                  ai_recommended: true,
-                },
+                ],
               },
-            });
+              recommendation_context: {
+                category: item.category,
+                recommended_price: product.price || "TBD",
+                user_context: {
+                  skin_type: ["analyzed"],
+                  skin_conditions: ["analyzed"],
+                  goals: ["future improvement"],
+                },
+                ai_recommended: true,
+              },
+            },
           });
         }
-        // If it's a string or other type, create a generic product entry
+        // Handle string or other simple types
         else if (item) {
           const itemName =
             typeof item === "string"
@@ -227,14 +239,17 @@ const BudgetScreen = ({ navigation, route }) => {
       });
 
       setFutureProducts(transformedFutureProducts);
+      console.log(
+        `✅ Processed ${transformedFutureProducts.length} future products`
+      );
     } else {
-      // Fallback mock data if no future recommendations are available
+      // UPDATED: Reduced fallback mock data to just 1 item
       setFutureProducts([
         {
           title: "Future Moisturizer Recommendation",
           subtitle: "Moisturizer",
           matchPercentage: 90,
-          description: "Hydrating formula for your skin type",
+          description: "Enhanced hydrating formula for your skin type",
           price: 399.0,
           priorityLevel: "Medium",
           image:
@@ -271,6 +286,7 @@ const BudgetScreen = ({ navigation, route }) => {
           },
         },
       ]);
+      console.log("⚠️ Using limited fallback future recommendations");
     }
   }, [recommendations]);
 
@@ -282,17 +298,8 @@ const BudgetScreen = ({ navigation, route }) => {
     <View className="flex-col">
       <TitleContainer
         title={"Budget Planner"}
-        description={"Optimize your skincare spending"}
+        description={"Optimize your skincare spending with curated essentials"}
       />
-
-      {/* Budget Information */}
-      {/* {recommendations?.total_budget && (
-        <View className="bg-primary-50 p-4 rounded-xl mb-4">
-          <Text className="text-primary-700 font-medium text-center">
-            💰 Total Budget: {recommendations.total_budget}
-          </Text>
-        </View>
-      )} */}
 
       <BudgetContainer
         budget={budget}
@@ -327,7 +334,7 @@ const BudgetScreen = ({ navigation, route }) => {
           Future Product Recommendations
         </Text>
         <Text className="text-textSecondary text-sm mb-4">
-          Products to consider for your next purchases
+          Next products to consider for your routine (Limited selection)
         </Text>
       </View>
     </View>
@@ -376,7 +383,7 @@ const BudgetScreen = ({ navigation, route }) => {
       </View>
 
       {/* Debug Info */}
-      {__DEV__ && (
+      {/* {__DEV__ && (
         <View className="absolute top-20 right-4 bg-black/80 p-2 rounded">
           <Text className="text-white text-xs">
             Backend Data: {isUsingBackendData ? "✅" : "❌"}
@@ -385,7 +392,7 @@ const BudgetScreen = ({ navigation, route }) => {
             Budget: ₱{budget} (Spent: ₱{spentAmount.toFixed(2)})
           </Text>
           <Text className="text-white text-xs">
-            Future Products: {futureProducts.length}
+            Future Products: {futureProducts.length} (Limited)
           </Text>
           <Text className="text-white text-xs">
             Routine:{" "}
@@ -397,7 +404,7 @@ const BudgetScreen = ({ navigation, route }) => {
             </Text>
           )}
         </View>
-      )}
+      )} */}
     </View>
   );
 };

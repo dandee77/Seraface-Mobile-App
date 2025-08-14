@@ -8,7 +8,11 @@ import { useSelector, useDispatch } from "react-redux";
 
 // Import the new recommendations mutation
 import { useGetProductRecommendationsMutation } from "../../../store/api/skincareApi";
-import { setRecommendationsError } from "../../../store/slices/skincareSlice";
+import {
+  setRecommendationsError,
+  forceRefreshRecommendations,
+  clearRecommendations,
+} from "../../../store/slices/skincareSlice";
 
 export default function ResultScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
@@ -85,16 +89,25 @@ export default function ResultScreen({ navigation, route }) {
   // Use real data if available, otherwise use mock data
   const finalAnalysisData = analysisData || mockAnalysisData;
 
-  // Automatically fetch recommendations when component mounts
+  // UPDATED: Clear old recommendations and fetch fresh ones
   useEffect(() => {
-    const fetchRecommendations = async () => {
+    const fetchFreshRecommendations = async () => {
       if (sessionId && analysisData) {
-        console.log("🛍️ Automatically fetching product recommendations...");
+        console.log(
+          "🔄 Clearing old recommendations and fetching fresh ones..."
+        );
+
+        // Clear existing recommendations first
+        dispatch(clearRecommendations());
+
         try {
           await getProductRecommendations(sessionId).unwrap();
-          console.log("✅ Product recommendations fetched successfully");
+          console.log("✅ Fresh product recommendations fetched successfully");
         } catch (error) {
-          console.error("❌ Failed to fetch product recommendations:", error);
+          console.error(
+            "❌ Failed to fetch fresh product recommendations:",
+            error
+          );
           dispatch(
             setRecommendationsError(
               error.message || "Failed to fetch recommendations"
@@ -104,10 +117,22 @@ export default function ResultScreen({ navigation, route }) {
       }
     };
 
-    // Fetch recommendations after a short delay to ensure UI is rendered
-    const timer = setTimeout(fetchRecommendations, 1000);
-    return () => clearTimeout(timer);
-  }, [sessionId, analysisData, getProductRecommendations, dispatch]);
+    // Only fetch if we don't have fresh recommendations
+    if (
+      !recommendations.isFresh ||
+      !recommendations.products ||
+      Object.keys(recommendations.products).length === 0
+    ) {
+      const timer = setTimeout(fetchFreshRecommendations, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    sessionId,
+    analysisData,
+    getProductRecommendations,
+    dispatch,
+    recommendations.isFresh,
+  ]);
 
   // Handle recommendation errors
   useEffect(() => {
@@ -275,7 +300,7 @@ export default function ResultScreen({ navigation, route }) {
   };
 
   const handleViewRecommendations = () => {
-    // Pass recommendations data and sessionId to ProductsScreen via navigation params
+    // Pass fresh recommendations data and sessionId to ProductsScreen
     navigation.navigate("Products", {
       recommendations: recommendations.products ? recommendations : null,
       sessionId: sessionId,
@@ -285,12 +310,22 @@ export default function ResultScreen({ navigation, route }) {
   const handleRetryRecommendations = async () => {
     if (sessionId) {
       try {
+        // Force refresh recommendations
+        dispatch(forceRefreshRecommendations());
         await getProductRecommendations(sessionId).unwrap();
       } catch (error) {
         console.error("❌ Retry failed:", error);
       }
     }
   };
+
+  // Calculate total products for debugging
+  const totalProducts = recommendations.products
+    ? Object.values(recommendations.products).reduce(
+        (sum, products) => sum + products.length,
+        0
+      )
+    : 0;
 
   return (
     <ScrollView
@@ -344,15 +379,18 @@ export default function ResultScreen({ navigation, route }) {
           {/* Recommendations Loading/Status */}
           {isLoadingRecommendations && (
             <Text className="text-info-600 text-sm mt-2">
-              🔄 Getting your personalized recommendations...
+              🔄 Getting your latest personalized recommendations...
             </Text>
           )}
 
-          {recommendations.products && !isLoadingRecommendations && (
-            <Text className="text-success-600 text-sm mt-2">
-              ✅ Personalized recommendations ready!
-            </Text>
-          )}
+          {recommendations.products &&
+            !isLoadingRecommendations &&
+            recommendations.isFresh && (
+              <Text className="text-success-600 text-sm mt-2">
+                ✅ Latest personalized recommendations ready! ({totalProducts}{" "}
+                products)
+              </Text>
+            )}
 
           {recommendations.error && !isLoadingRecommendations && (
             <View className="mt-2">
@@ -386,8 +424,8 @@ export default function ResultScreen({ navigation, route }) {
           <NextButton
             text={
               isLoadingRecommendations
-                ? "Loading Recommendations..."
-                : "View Recommendations"
+                ? "Loading Latest Recommendations..."
+                : "View Latest Recommendations"
             }
             icon={
               isLoadingRecommendations
@@ -399,8 +437,8 @@ export default function ResultScreen({ navigation, route }) {
           />
         </View>
 
-        {/* Debug Info (remove in production) */}
-        {__DEV__ && (
+        {/* Debug Info */}
+        {/* {__DEV__ && (
           <View className="mt-4 p-4 bg-gray-100 rounded-xl">
             <Text className="text-sm text-gray-600">
               Debug - Session ID: {finalAnalysisData.session_id}
@@ -410,7 +448,12 @@ export default function ResultScreen({ navigation, route }) {
             </Text>
             <Text className="text-sm text-gray-600">
               Recommendations:{" "}
-              {recommendations.products ? "Loaded" : "Not loaded"}
+              {recommendations.products
+                ? `Loaded (${totalProducts} products)`
+                : "Not loaded"}
+            </Text>
+            <Text className="text-sm text-gray-600">
+              Fresh: {recommendations.isFresh ? "Yes" : "No"}
             </Text>
             {recommendations.total_budget && (
               <Text className="text-sm text-gray-600">
@@ -418,7 +461,7 @@ export default function ResultScreen({ navigation, route }) {
               </Text>
             )}
           </View>
-        )}
+        )} */}
       </View>
     </ScrollView>
   );

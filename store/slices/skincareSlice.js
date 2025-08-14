@@ -19,7 +19,7 @@ const initialState = {
   // Analysis results (EXISTING - DON'T CHANGE)
   analysisResults: null,
 
-  // Product Recommendations (EXISTING - DON'T CHANGE)
+  // Product Recommendations (UPDATED - LIMIT TO LATEST)
   recommendations: {
     allocation: {},
     products: {},
@@ -28,6 +28,8 @@ const initialState = {
     isLoading: false,
     error: null,
     lastFetchTime: null,
+    // Add flag to track if recommendations are fresh
+    isFresh: false,
   },
 
   // Routine Creation (NEW)
@@ -146,7 +148,7 @@ const skincareSlice = createSlice({
       state.analysisResults = null;
     },
 
-    // Recommendation management actions (EXISTING - DON'T CHANGE)
+    // UPDATED: Recommendation management actions - Clear old data completely
     clearRecommendations: (state) => {
       state.recommendations = {
         allocation: {},
@@ -156,21 +158,36 @@ const skincareSlice = createSlice({
         isLoading: false,
         error: null,
         lastFetchTime: null,
+        isFresh: false,
       };
     },
 
     setRecommendationsLoading: (state, action) => {
       state.recommendations.isLoading = action.payload;
+      if (action.payload) {
+        // When starting to load, mark as not fresh
+        state.recommendations.isFresh = false;
+      }
     },
 
     setRecommendationsError: (state, action) => {
       state.recommendations.error = action.payload;
       state.recommendations.isLoading = false;
+      state.recommendations.isFresh = false;
+    },
+
+    // NEW: Force refresh recommendations
+    forceRefreshRecommendations: (state) => {
+      // Clear existing data and mark for refresh
+      state.recommendations.products = {};
+      state.recommendations.allocation = {};
+      state.recommendations.future_recommendations = [];
+      state.recommendations.isFresh = false;
+      state.recommendations.lastFetchTime = null;
     },
 
     // Routine management actions (FIXED)
     clearRoutines: (state) => {
-      // Ensure routines exists before clearing it
       state.routines = {
         product_type: null,
         routine: [],
@@ -181,7 +198,6 @@ const skincareSlice = createSlice({
     },
 
     setRoutinesLoading: (state, action) => {
-      // Ensure routines exists before setting isLoading
       if (!state.routines) {
         state.routines = { ...initialState.routines };
       }
@@ -189,7 +205,6 @@ const skincareSlice = createSlice({
     },
 
     setRoutinesError: (state, action) => {
-      // Ensure routines exists before setting error
       if (!state.routines) {
         state.routines = { ...initialState.routines };
       }
@@ -261,12 +276,13 @@ const skincareSlice = createSlice({
       }
     );
 
-    // Handle product recommendations (EXISTING - DON'T CHANGE)
+    // UPDATED: Handle product recommendations - Limit to latest only
     builder.addMatcher(
       skincareApi.endpoints.getProductRecommendations.matchPending,
       (state) => {
         state.recommendations.isLoading = true;
         state.recommendations.error = null;
+        state.recommendations.isFresh = false;
       }
     );
 
@@ -276,28 +292,64 @@ const skincareSlice = createSlice({
         state.recommendations.isLoading = false;
         state.recommendations.error = null;
         state.recommendations.lastFetchTime = Date.now();
+        state.recommendations.isFresh = true;
 
-        // Safely assign payload data
         const payload = action.payload;
+
+        // UPDATED: Process products to keep only the latest/top recommendation per category
+        const limitedProducts = {};
+        if (payload.products) {
+          Object.entries(payload.products).forEach(([category, products]) => {
+            if (Array.isArray(products) && products.length > 0) {
+              // Only keep the first (latest/most relevant) product for each category
+              limitedProducts[category] = [products[0]];
+              console.log(
+                `📊 Limited ${category} products to 1 (was ${products.length})`
+              );
+            }
+          });
+        }
+
+        // Safely assign limited products
+        state.recommendations.products = JSON.parse(
+          JSON.stringify(limitedProducts)
+        );
 
         // Safely assign allocation (ensure it's a plain object)
         state.recommendations.allocation = payload.allocation
           ? JSON.parse(JSON.stringify(payload.allocation))
           : {};
 
-        // Safely assign products (ensure it's a plain object)
-        state.recommendations.products = payload.products
-          ? JSON.parse(JSON.stringify(payload.products))
-          : {};
-
         // Assign primitive values directly
         state.recommendations.total_budget = payload.total_budget || null;
 
-        // Safely assign future recommendations (ensure it's a plain array)
-        state.recommendations.future_recommendations =
-          payload.future_recommendations
-            ? JSON.parse(JSON.stringify(payload.future_recommendations))
-            : [];
+        // UPDATED: Limit future recommendations to maximum 3 items
+        let limitedFutureRecommendations = [];
+        if (
+          payload.future_recommendations &&
+          Array.isArray(payload.future_recommendations)
+        ) {
+          limitedFutureRecommendations = payload.future_recommendations.slice(
+            0,
+            3
+          );
+          console.log(
+            `📊 Limited future recommendations to ${limitedFutureRecommendations.length} (was ${payload.future_recommendations.length})`
+          );
+        }
+
+        state.recommendations.future_recommendations = JSON.parse(
+          JSON.stringify(limitedFutureRecommendations)
+        );
+
+        console.log("✅ Recommendations processed with limits:", {
+          categories: Object.keys(limitedProducts).length,
+          totalProducts: Object.values(limitedProducts).reduce(
+            (sum, products) => sum + products.length,
+            0
+          ),
+          futureRecommendations: limitedFutureRecommendations.length,
+        });
       }
     );
 
@@ -307,14 +359,14 @@ const skincareSlice = createSlice({
         state.recommendations.isLoading = false;
         state.recommendations.error =
           action.payload?.message || "Failed to get recommendations";
+        state.recommendations.isFresh = false;
       }
     );
 
-    // Handle routine creation (FIXED)
+    // Handle routine creation (EXISTING)
     builder.addMatcher(
       skincareApi.endpoints.getRoutineCreation.matchPending,
       (state) => {
-        // Ensure routines exists before setting properties
         if (!state.routines) {
           state.routines = { ...initialState.routines };
         }
@@ -326,7 +378,6 @@ const skincareSlice = createSlice({
     builder.addMatcher(
       skincareApi.endpoints.getRoutineCreation.matchFulfilled,
       (state, action) => {
-        // Ensure routines exists before setting properties
         if (!state.routines) {
           state.routines = { ...initialState.routines };
         }
@@ -335,13 +386,9 @@ const skincareSlice = createSlice({
         state.routines.error = null;
         state.routines.lastFetchTime = Date.now();
 
-        // Safely assign payload data
         const payload = action.payload;
 
-        // Assign product_type
         state.routines.product_type = payload.product_type || null;
-
-        // Safely assign routines (ensure it's a plain array)
         state.routines.routine = payload.routine
           ? JSON.parse(JSON.stringify(payload.routine))
           : [];
@@ -351,7 +398,6 @@ const skincareSlice = createSlice({
     builder.addMatcher(
       skincareApi.endpoints.getRoutineCreation.matchRejected,
       (state, action) => {
-        // Ensure routines exists before setting properties
         if (!state.routines) {
           state.routines = { ...initialState.routines };
         }
@@ -384,6 +430,7 @@ export const {
   clearRecommendations,
   setRecommendationsLoading,
   setRecommendationsError,
+  forceRefreshRecommendations,
   clearRoutines,
   setRoutinesLoading,
   setRoutinesError,

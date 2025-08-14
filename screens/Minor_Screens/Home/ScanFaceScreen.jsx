@@ -195,7 +195,7 @@ const ScanFaceScreen = ({ navigation }) => {
         </View>
 
         {/* Debug Info (remove in production) */}
-        {__DEV__ && (
+        {/* {__DEV__ && (
           <View className="mt-4 p-4 bg-gray-100 rounded-xl">
             <Text className="text-sm text-gray-600">Debug Info:</Text>
             <Text className="text-sm text-gray-600">
@@ -221,7 +221,7 @@ const ScanFaceScreen = ({ navigation }) => {
               </>
             )}
           </View>
-        )}
+        )} */}
       </View>
     </ScrollView>
   );
