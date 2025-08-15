@@ -1,8 +1,12 @@
 import "./global.css";
+import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { Pressable } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Pressable, View } from "react-native";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  useNavigation,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GradientIcon } from "./components/UI_Common/Gradients/GradientIcon";
@@ -25,10 +29,7 @@ import ResultScreen from "./screens/Minor_Screens/Home/ResultScreen";
 import ProductScreen from "./screens/Minor_Screens/Products/ProductScreen";
 import Colors from "./constants/colors";
 import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
-import CommunityScreen from "./screens/Major_Screens/CommunityScreen";
-import ChatFAB from "./components/UI_Common/Commons/ChatFAB";
 
-const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 const MyTheme = {
@@ -39,247 +40,238 @@ const MyTheme = {
   },
 };
 
-function HomeStackNavigator() {
-  return (
-    <Stack.Navigator
-      screenOptions={({ navigation, route }) => ({
-        headerShown: true,
-        animation: "slide_from_right",
-        headerLeft: () => null,
-        headerRight: () => {
-          if (route.name === "Result" || route.name === "MainHome") return null;
-          return navigation.canGoBack() ? (
-            <Pressable
-              onPress={() => navigation.goBack()}
-              style={{ marginRight: 15 }}
-              android_ripple={{
-                color: Colors.primary200,
-                borderless: true,
-              }}
-            >
-              <GradientIcon
-                name="exit"
-                size={28}
-                focused={true}
-                style={{ transform: [{ rotate: "180deg" }] }}
-              />
-            </Pressable>
-          ) : null;
-        },
-      })}
-    >
-      <Stack.Screen
-        name="MainHome"
-        component={HomeScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"SerafaceAI"} />,
-          headerBackVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name="SkinProfile"
-        component={SkinProfileScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Skin Profile"} />,
-          headerBackVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name="ScanFace"
-        component={ScanFaceScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Scan Face"} />,
-          headerBackVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name="Result"
-        component={ResultScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Analysis Report"} />,
-          headerRight: () => null,
-          headerBackVisible: false,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
+// Custom Bottom Navigation Component
+function CustomBottomNavigation({ currentRoute }) {
+  const navigation = useNavigation();
 
-function ProductsStackNavigator() {
-  return (
-    <Stack.Navigator
-      screenOptions={({ navigation, route }) => ({
-        headerShown: true,
-        animation: "slide_from_right",
-        headerLeft: () => null,
-        headerRight: () => {
-          if (route.name === "Result" || route.name === "MainHome") return null;
-          return navigation.canGoBack() ? (
-            <Pressable
-              onPress={() => navigation.goBack()}
-              style={{ marginRight: 15 }}
-              android_ripple={{
-                color: Colors.primary200,
-                borderless: true,
-              }}
-            >
-              <GradientIcon
-                name="exit"
-                size={28}
-                focused={true}
-                style={{ transform: [{ rotate: "180deg" }] }}
-              />
-            </Pressable>
-          ) : null;
-        },
-      })}
-    >
-      <Stack.Screen
-        name="MainProducts"
-        component={ProductsScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Recommendations"} />,
-          headerBackVisible: false,
-        }}
-        initialParams={{ recommendations: null, sessionId: null }}
-      />
-      <Stack.Screen
-        name="Product"
-        component={ProductScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Product Details"} />,
-          headerBackVisible: false,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
+  const getCurrentTab = () => {
+    const routeName = currentRoute;
+    if (
+      routeName === "Home" ||
+      routeName === "SkinProfile" ||
+      routeName === "ScanFace" ||
+      routeName === "Result"
+    )
+      return "Home";
+    if (routeName === "Products" || routeName === "Product") return "Products";
+    if (routeName === "Routines") return "Routines";
+    if (routeName === "Budget") return "Budget";
+    return "Home";
+  };
 
-function RoutineStackNavigator() {
+  const currentTab = getCurrentTab();
+
+  const handleTabPress = (tabName) => {
+    switch (tabName) {
+      case "Home":
+        navigation.navigate("Home");
+        break;
+      case "Products":
+        navigation.navigate("Products", {
+          recommendations: null,
+          sessionId: null,
+        });
+        break;
+      case "Routines":
+        navigation.navigate("Routines");
+        break;
+      case "Budget":
+        navigation.navigate("Budget");
+        break;
+    }
+  };
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        animation: "slide_from_right",
+    <View
+      style={{
+        backgroundColor: Colors.background,
+        height: 67,
+        paddingTop: 6,
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
       }}
     >
-      <Stack.Screen
-        name="MainRoutine"
-        component={RoutinesScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
-          headerBackVisible: false,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
+      <Pressable
+        onPress={() => handleTabPress("Home")}
+        style={{ alignItems: "center", flex: 1 }}
+        android_ripple={{ color: Colors.primary200, borderless: true }}
+      >
+        <GradientIcon name={"home"} size={28} focused={currentTab === "Home"} />
+        <TabBarLabel text={"Home"} focused={currentTab === "Home"} />
+      </Pressable>
 
-function BudgetStackNavigator() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        animation: "slide_from_right",
-      }}
-    >
-      <Stack.Screen
-        name="MainBudget"
-        component={BudgetScreen}
-        options={{
-          headerTitle: () => <GradientHeaderTitle title={"Budget Planner"} />,
-          headerBackVisible: false,
-        }}
-      />
-    </Stack.Navigator>
+      <Pressable
+        onPress={() => handleTabPress("Products")}
+        style={{ alignItems: "center", flex: 1 }}
+        android_ripple={{ color: Colors.primary200, borderless: true }}
+      >
+        <GradientIcon
+          name={"cube"}
+          size={28}
+          focused={currentTab === "Products"}
+        />
+        <TabBarLabel text={"Products"} focused={currentTab === "Products"} />
+      </Pressable>
+
+      <Pressable
+        onPress={() => handleTabPress("Routines")}
+        style={{ alignItems: "center", flex: 1 }}
+        android_ripple={{ color: Colors.primary200, borderless: true }}
+      >
+        <GradientIcon
+          name={"time"}
+          size={28}
+          focused={currentTab === "Routines"}
+        />
+        <TabBarLabel text={"Routine"} focused={currentTab === "Routines"} />
+      </Pressable>
+
+      <Pressable
+        onPress={() => handleTabPress("Budget")}
+        style={{ alignItems: "center", flex: 1 }}
+        android_ripple={{ color: Colors.primary200, borderless: true }}
+      >
+        <GradientIcon
+          name={"wallet"}
+          size={28}
+          focused={currentTab === "Budget"}
+        />
+        <TabBarLabel text={"Budget"} focused={currentTab === "Budget"} />
+      </Pressable>
+    </View>
   );
 }
 
 function AppNavigator() {
+  const [currentRoute, setCurrentRoute] = React.useState("Home");
+
+  const handleNavigationStateChange = (state) => {
+    if (state) {
+      const currentRouteName = state.routes[state.index]?.name;
+      if (currentRouteName) {
+        setCurrentRoute(currentRouteName);
+      }
+    }
+  };
+
   return (
-    <NavigationContainer theme={MyTheme}>
-      <Tab.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          tabBarStyle: {
-            backgroundColor: Colors.background,
-            height: 67,
-            paddingTop: 6,
-          },
-          headerStyle: {
-            backgroundColor: Colors.background,
-            height: 85,
-          },
-          tabBarButton: (props) => (
-            <Pressable
-              {...props}
-              android_ripple={{
-                color: Colors.primary200,
-                borderless: true,
-              }}
-            />
-          ),
-          headerTitleContainerStyle: {
-            flex: 1,
-            margin: 0,
-            padding: 0,
-          },
-          tabBarHideOnKeyboard: true,
-        }}
-      >
-        <Tab.Screen
-          name="Home"
-          component={HomeStackNavigator}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <GradientIcon name={"home"} size={28} focused={focused} />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <TabBarLabel text={"Home"} focused={focused} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Products"
-          component={ProductsStackNavigator}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <GradientIcon name={"cube"} size={28} focused={focused} />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <TabBarLabel text={"Products"} focused={focused} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Routine"
-          component={RoutineStackNavigator}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <GradientIcon name={"time"} size={28} focused={focused} />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <TabBarLabel text={"Routine"} focused={focused} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Budget"
-          component={BudgetStackNavigator}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <GradientIcon name={"wallet"} size={28} focused={focused} />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <TabBarLabel text={"Budget"} focused={focused} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
+    <NavigationContainer
+      theme={MyTheme}
+      onStateChange={handleNavigationStateChange}
+    >
+      <View style={{ flex: 1 }}>
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={({ navigation, route }) => ({
+            headerShown: true,
+            animation: "slide_from_right",
+            headerLeft: () => null,
+            headerRight: () => {
+              if (route.name === "Result" || route.name === "Home") return null;
+              return navigation.canGoBack() ? (
+                <Pressable
+                  onPress={() => navigation.goBack()}
+                  style={{ marginRight: 15 }}
+                  android_ripple={{
+                    color: Colors.primary200,
+                    borderless: true,
+                  }}
+                >
+                  <GradientIcon
+                    name="exit"
+                    size={28}
+                    focused={true}
+                    style={{ transform: [{ rotate: "180deg" }] }}
+                  />
+                </Pressable>
+              ) : null;
+            },
+          })}
+        >
+          {/* Home Stack Screens */}
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              headerTitle: () => <GradientHeaderTitle title={"SerafaceAI"} />,
+              headerBackVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="SkinProfile"
+            component={SkinProfileScreen}
+            options={{
+              headerTitle: () => <GradientHeaderTitle title={"Skin Profile"} />,
+              headerBackVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="ScanFace"
+            component={ScanFaceScreen}
+            options={{
+              headerTitle: () => <GradientHeaderTitle title={"Scan Face"} />,
+              headerBackVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Result"
+            component={ResultScreen}
+            options={{
+              headerTitle: () => (
+                <GradientHeaderTitle title={"Analysis Report"} />
+              ),
+              headerRight: () => null,
+              headerBackVisible: false,
+            }}
+          />
+
+          {/* Main Screens */}
+          <Stack.Screen
+            name="Products"
+            component={ProductsScreen}
+            options={{
+              headerTitle: () => (
+                <GradientHeaderTitle title={"Recommendations"} />
+              ),
+              headerBackVisible: false,
+            }}
+            initialParams={{ recommendations: null, sessionId: null }}
+          />
+          <Stack.Screen
+            name="Routines"
+            component={RoutinesScreen}
+            options={{
+              headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
+              headerBackVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Budget"
+            component={BudgetScreen}
+            options={{
+              headerTitle: () => (
+                <GradientHeaderTitle title={"Budget Planner"} />
+              ),
+              headerBackVisible: false,
+            }}
+          />
+
+          {/* Detail Screens */}
+          <Stack.Screen
+            name="Product"
+            component={ProductScreen}
+            options={{
+              headerTitle: () => (
+                <GradientHeaderTitle title={"Product Details"} />
+              ),
+              headerBackVisible: false,
+            }}
+          />
+        </Stack.Navigator>
+
+        <CustomBottomNavigation currentRoute={currentRoute} />
+      </View>
     </NavigationContainer>
   );
 }
