@@ -202,7 +202,12 @@ const fallbackEveningRoutine = [
 export default function RoutinesScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
+
+  // ✅ CORRECT: ALL HOOKS AT THE TOP
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [morningRoutine, setMorningRoutine] = useState([]);
+  const [eveningRoutine, setEveningRoutine] = useState([]);
+  const [asNeededRoutine, setAsNeededRoutine] = useState([]);
 
   // Get session ID
   const sessionId =
@@ -211,17 +216,13 @@ export default function RoutinesScreen({ navigation, route }) {
   // Get routine data from Redux store
   const routineData = useSelector((state) => state.skincare.routines);
 
-  // State for morning and evening routines
-  const [morningRoutine, setMorningRoutine] = useState([]);
-  const [eveningRoutine, setEveningRoutine] = useState([]);
-  const [asNeededRoutine, setAsNeededRoutine] = useState([]);
-
   // RTK Query hook for routine creation
   const [getRoutineCreation, { isLoading, error: routineError }] =
     useGetRoutineCreationMutation();
 
-  // Process routine data from backend
+  // ALL useEffect hooks here
   useEffect(() => {
+    // Process routine data from backend
     if (routineData && routineData.routine && routineData.routine.length > 0) {
       console.log("🗓️ Processing routine data from backend");
 
@@ -241,7 +242,7 @@ export default function RoutinesScreen({ navigation, route }) {
         // Create routine item
         const routineItem = {
           id: index + 1,
-          title: item.name.split(" ").slice(0, 2).join(" "), // First two words for title
+          title: item.name.split(" ").slice(0, 2).join(" "),
           subtitle: item.tag,
           description: item.description,
           duration: item.duration,
@@ -319,6 +320,13 @@ export default function RoutinesScreen({ navigation, route }) {
     routineTitle = "As Needed";
   }
 
+  // If no routine items in any category
+  const hasNoRoutines =
+    morningRoutine.length === 0 &&
+    eveningRoutine.length === 0 &&
+    asNeededRoutine.length === 0;
+
+  // ✅ CORRECT: ALL CONDITIONAL RENDERING AFTER ALL HOOKS
   // Loading state
   if (isLoading) {
     return (
@@ -362,12 +370,6 @@ export default function RoutinesScreen({ navigation, route }) {
       </View>
     );
   }
-
-  // If no routine items in any category
-  const hasNoRoutines =
-    morningRoutine.length === 0 &&
-    eveningRoutine.length === 0 &&
-    asNeededRoutine.length === 0;
 
   if (hasNoRoutines) {
     return (
@@ -449,7 +451,7 @@ export default function RoutinesScreen({ navigation, route }) {
               <RoutineItem
                 key={`${selectedIndex}-${index}`}
                 {...item}
-                showDetails={index === 0} // First item is expanded by default
+                showDetails={index === 0}
               />
             ))
           ) : (
