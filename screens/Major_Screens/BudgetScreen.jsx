@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Alert } from "react-native";
+import { View, Text, FlatList, Alert, ScrollView } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import TitleContainer from "../../components/UI_Common/Commons/TitleContainer";
@@ -345,32 +345,76 @@ const BudgetScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View className="flex-1">
-      <View className="px-8 py-6 gap-3">
-        <FlatList
-          data={futureProducts}
-          renderItem={({ item }) => <ProductItem {...item} />}
-          keyExtractor={(item, index) => `future-product-${index}`}
-          ListHeaderComponent={ListHeaderComponent}
-          contentContainerStyle={{
-            paddingBottom: 100,
-          }}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View className="py-6 items-center">
-              <Text className="text-textSecondary text-center">
-                No future product recommendations available at this time.
-              </Text>
-            </View>
+    <ScrollView
+      className="flex-1 px-8 py-6"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
+    >
+      <View className="flex-col gap-3">
+        <TitleContainer
+          title={"Budget Planner"}
+          description={
+            "Optimize your skincare spending with curated essentials"
           }
         />
-      </View>
 
-      <View
-        className="absolute bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200"
-        style={[{ paddingBottom: Math.max(insets.bottom, 20) }]}
-      >
-        <View className="px-8 w-full pt-4">
+        <BudgetContainer
+          budget={budget}
+          onBudgetChange={handleBudgetChange}
+          spentAmount={spentAmount}
+        />
+
+        <RoadmapContainer spentAmount={spentAmount} budget={budget} />
+
+        {/* Allocation Information */}
+        {recommendations?.allocation &&
+          Object.keys(recommendations.allocation).length > 0 && (
+            <View className="bg-white p-4 rounded-xl mb-4 shadow-sm">
+              <Text className="text-lg font-bold mb-2">Budget Allocation</Text>
+              {Object.entries(recommendations.allocation).map(
+                ([category, amount]) => (
+                  <View
+                    key={category}
+                    className="flex-row justify-between py-1"
+                  >
+                    <Text className="text-textSecondary capitalize">
+                      {category}:
+                    </Text>
+                    <Text className="text-primary-600 font-medium">
+                      {amount}%
+                    </Text>
+                  </View>
+                )
+              )}
+            </View>
+          )}
+
+        <View className="flex-col mt-4">
+          <Text className="font-bold text-lg">
+            Future Product Recommendations
+          </Text>
+          <Text className="text-textSecondary text-sm mb-4">
+            Next products to consider for your routine (Limited selection)
+          </Text>
+        </View>
+
+        {/* Future Products */}
+        {futureProducts.length > 0 ? (
+          <View className="gap-3">
+            {futureProducts.map((item, index) => (
+              <ProductItem key={`future-product-${index}`} {...item} />
+            ))}
+          </View>
+        ) : (
+          <View className="py-6 items-center">
+            <Text className="text-textSecondary text-center">
+              No future product recommendations available at this time.
+            </Text>
+          </View>
+        )}
+
+        {/* Next Button */}
+        <View className="mt-8 mb-4">
           <NextButton
             text={
               isLoadingRoutine ? "Creating Your Routine..." : "See Your Routine"
@@ -381,31 +425,7 @@ const BudgetScreen = ({ navigation, route }) => {
           />
         </View>
       </View>
-
-      {/* Debug Info */}
-      {/* {__DEV__ && (
-        <View className="absolute top-20 right-4 bg-black/80 p-2 rounded">
-          <Text className="text-white text-xs">
-            Backend Data: {isUsingBackendData ? "✅" : "❌"}
-          </Text>
-          <Text className="text-white text-xs">
-            Budget: ₱{budget} (Spent: ₱{spentAmount.toFixed(2)})
-          </Text>
-          <Text className="text-white text-xs">
-            Future Products: {futureProducts.length} (Limited)
-          </Text>
-          <Text className="text-white text-xs">
-            Routine:{" "}
-            {isLoadingRoutine ? "Loading..." : routineError ? "❌" : "✅"}
-          </Text>
-          {sessionId && (
-            <Text className="text-white text-xs">
-              Session: {sessionId.substring(0, 8)}...
-            </Text>
-          )}
-        </View>
-      )} */}
-    </View>
+    </ScrollView>
   );
 };
 

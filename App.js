@@ -155,10 +155,51 @@ function ProductsStackNavigator() {
   );
 }
 
+function RoutineStackNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        animation: "slide_from_right",
+      }}
+    >
+      <Stack.Screen
+        name="MainRoutine"
+        component={RoutinesScreen}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
+          headerBackVisible: false,
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function BudgetStackNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        animation: "slide_from_right",
+      }}
+    >
+      <Stack.Screen
+        name="MainBudget"
+        component={BudgetScreen}
+        options={{
+          headerTitle: () => <GradientHeaderTitle title={"Budget Planner"} />,
+          headerBackVisible: false,
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AppNavigator() {
   return (
     <NavigationContainer theme={MyTheme}>
       <Tab.Navigator
+        initialRouteName="Home"
         screenOptions={{
           tabBarStyle: {
             backgroundColor: Colors.background,
@@ -183,6 +224,7 @@ function AppNavigator() {
             margin: 0,
             padding: 0,
           },
+          tabBarHideOnKeyboard: true,
         }}
       >
         <Tab.Screen
@@ -213,9 +255,9 @@ function AppNavigator() {
         />
         <Tab.Screen
           name="Routine"
-          component={RoutinesScreen}
+          component={RoutineStackNavigator}
           options={{
-            headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
+            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <GradientIcon name={"time"} size={28} focused={focused} />
             ),
@@ -226,9 +268,9 @@ function AppNavigator() {
         />
         <Tab.Screen
           name="Budget"
-          component={BudgetScreen}
+          component={BudgetStackNavigator}
           options={{
-            headerTitle: () => <GradientHeaderTitle title={"Budget Planner"} />,
+            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <GradientIcon name={"wallet"} size={28} focused={focused} />
             ),
