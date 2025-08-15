@@ -43,7 +43,7 @@ export default function SegmentedControl({
               <View className="flex-row items-center justify-center">
                 <Ionicons
                   name={isSelected ? option.icon : `${option.icon}-outline`}
-                  size={18}
+                  size={14}
                   color={
                     isSelected
                       ? index === 0
@@ -53,7 +53,7 @@ export default function SegmentedControl({
                           : Colors.primary600
                       : Colors.inactiveIcon
                   }
-                  style={{ marginRight: 4 }}
+                  style={{ marginRight: 3 }}
                 />
                 <Text
                   className={`text-center ${
@@ -61,7 +61,7 @@ export default function SegmentedControl({
                       ? "text-textPrimary font-semibold"
                       : "text-textSecondary font-medium"
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 12 }}
                   numberOfLines={1}
                 >
                   {option.label}

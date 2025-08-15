@@ -415,9 +415,8 @@ export default function RoutinesScreen({ navigation, route }) {
             { label: "Morning", icon: "sunny" },
             { label: "Evening", icon: "moon" },
             {
-              label: "As Needed",
+              label: "Manual",
               icon: "bandage",
-              disabled: asNeededRoutine.length === 0,
             },
           ]}
         />
