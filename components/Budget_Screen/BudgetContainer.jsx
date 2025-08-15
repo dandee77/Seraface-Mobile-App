@@ -76,21 +76,27 @@ export default function BudgetContainer({
         </View>
       </View>
 
-      <View className="bg-white rounded-xl p-4 border border-gray-200 mb-4">
-        <View className="flex-row justify-between items-center">
-          <Text className="text-textSecondary">Monthly skincare budget</Text>
-          <View className="flex-row items-center">
-            <Text className="font-bold text-success-500 mr-1">₱</Text>
-            <TextInput
-              className="border border-gray-200 bg-white rounded-lg py-1 px-3 min-w-[80px] text-right font-bold text-success-500"
-              keyboardType="numeric"
-              value={inputValue}
-              onChangeText={handleBudgetChange}
-              onBlur={handleBlur}
-              placeholder={MIN_BUDGET.toString()}
-              placeholderTextColor={Colors.textTertiary}
-            />
-          </View>
+      <View className="bg-gray-50 rounded-xl p-4 mb-4">
+        <Text className="text-textSecondary text-sm mb-3">
+          Monthly skincare budget
+        </Text>
+        <View className="flex-row items-center justify-center">
+          <Text className="font-bold text-success-500 text-xl mr-1">₱</Text>
+          <TextInput
+            className="border border-gray-300 bg-white rounded-lg py-2 px-3 text-center font-bold text-success-500 text-lg"
+            style={{
+              width: 100,
+              minWidth: 80,
+              maxWidth: 120,
+            }}
+            keyboardType="numeric"
+            value={inputValue}
+            onChangeText={handleBudgetChange}
+            onBlur={handleBlur}
+            placeholder={MIN_BUDGET.toString()}
+            placeholderTextColor={Colors.textTertiary}
+            selectTextOnFocus={true}
+          />
         </View>
       </View>
 

@@ -9,6 +9,7 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { GradientIcon } from "./components/UI_Common/Gradients/GradientIcon";
 import { GradientHeaderTitle } from "./components/UI_Common/Gradients/GradientHeaderTitle";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -81,6 +82,30 @@ function CustomBottomNavigation({ currentRoute }) {
     }
   };
 
+  const TabButton = ({ tabName, iconName, label }) => {
+    const isActive = currentTab === tabName;
+
+    return (
+      <Pressable
+        onPress={() => handleTabPress(tabName)}
+        style={{
+          alignItems: "center",
+          flex: 1,
+          paddingVertical: 8,
+        }}
+        android_ripple={{ color: Colors.primary200, borderless: true }}
+      >
+        <Ionicons
+          name={isActive ? iconName : `${iconName}-outline`}
+          size={24}
+          color={isActive ? Colors.primary600 : Colors.textSecondary}
+          style={{ marginBottom: 4 }}
+        />
+        <TabBarLabel text={label} focused={isActive} />
+      </Pressable>
+    );
+  };
+
   return (
     <View
       style={{
@@ -90,55 +115,14 @@ function CustomBottomNavigation({ currentRoute }) {
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
+        borderTopWidth: 1,
+        borderTopColor: Colors.border,
       }}
     >
-      <Pressable
-        onPress={() => handleTabPress("Home")}
-        style={{ alignItems: "center", flex: 1 }}
-        android_ripple={{ color: Colors.primary200, borderless: true }}
-      >
-        <GradientIcon name={"home"} size={28} focused={currentTab === "Home"} />
-        <TabBarLabel text={"Home"} focused={currentTab === "Home"} />
-      </Pressable>
-
-      <Pressable
-        onPress={() => handleTabPress("Products")}
-        style={{ alignItems: "center", flex: 1 }}
-        android_ripple={{ color: Colors.primary200, borderless: true }}
-      >
-        <GradientIcon
-          name={"cube"}
-          size={28}
-          focused={currentTab === "Products"}
-        />
-        <TabBarLabel text={"Products"} focused={currentTab === "Products"} />
-      </Pressable>
-
-      <Pressable
-        onPress={() => handleTabPress("Routines")}
-        style={{ alignItems: "center", flex: 1 }}
-        android_ripple={{ color: Colors.primary200, borderless: true }}
-      >
-        <GradientIcon
-          name={"time"}
-          size={28}
-          focused={currentTab === "Routines"}
-        />
-        <TabBarLabel text={"Routine"} focused={currentTab === "Routines"} />
-      </Pressable>
-
-      <Pressable
-        onPress={() => handleTabPress("Budget")}
-        style={{ alignItems: "center", flex: 1 }}
-        android_ripple={{ color: Colors.primary200, borderless: true }}
-      >
-        <GradientIcon
-          name={"wallet"}
-          size={28}
-          focused={currentTab === "Budget"}
-        />
-        <TabBarLabel text={"Budget"} focused={currentTab === "Budget"} />
-      </Pressable>
+      <TabButton tabName="Home" iconName="home" label="Home" />
+      <TabButton tabName="Products" iconName="cube" label="Products" />
+      <TabButton tabName="Routines" iconName="time" label="Routine" />
+      <TabButton tabName="Budget" iconName="wallet" label="Budget" />
     </View>
   );
 }
