@@ -11,7 +11,6 @@
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "2.1.2",
-    "@react-native-community/slider": "4.5.6",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/bottom-tabs": "^7.4.3",
     "@react-navigation/native": "^7.1.15",
@@ -32,7 +31,6 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-segmented-control-tab": "^4.0.0",
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0",
     "tailwindcss": "^3.4.17"

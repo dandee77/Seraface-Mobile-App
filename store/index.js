@@ -14,6 +14,19 @@ const persistConfig = {
   timeout: 10000,
   serialize: true,
   deserialize: true,
+  // Add error handling for persist failures
+  writeFailHandler: (err) => {
+    console.warn('Redux persist write failed:', err);
+  },
+  stateReconciler: (inboundState, originalState) => {
+    // Handle state reconciliation errors gracefully
+    try {
+      return { ...originalState, ...inboundState };
+    } catch (error) {
+      console.warn('Redux persist state reconciliation failed:', error);
+      return originalState;
+    }
+  },
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -23,13 +36,24 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE", "persist/REGISTER"],
+        ignoredPaths: ['register'],
       },
     }).concat(skincareApi.middleware),
   devTools: __DEV__, // Enable Redux DevTools in development
 });
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(store, null, () => {
+  console.log('Redux persist rehydration completed');
+});
+
+// Handle persistor errors gracefully
+persistor.subscribe(() => {
+  const state = persistor.getState();
+  if (state.error) {
+    console.error('Redux persist error:', state.error);
+  }
+});
 
 // Enable listener behavior for the store
 setupListeners(store.dispatch);

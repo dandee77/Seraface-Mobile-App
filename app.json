@@ -22,7 +22,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.seraface.mobile"
+      "package": "com.seraface.mobile",
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +32,8 @@
       "eas": {
         "projectId": "caea893b-dbcc-4f51-a055-c6f1ab8f6787"
       }
-    }
+    },
+    "scheme": "seraface",
+    "platforms": ["ios", "android", "web"]
   }
 }
