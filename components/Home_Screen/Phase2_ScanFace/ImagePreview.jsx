@@ -41,7 +41,7 @@ export default function ImagePreview({ onImageSelect }) {
         mimeType = "image/jpeg";
       }
 
-      // Create proper image data structure for React Native FormData
+      // WEB ONLY: Create proper image data structure and File object
       const imageData = {
         uri: selectedAsset.uri,
         type: mimeType,
@@ -51,8 +51,31 @@ export default function ImagePreview({ onImageSelect }) {
         fileSize: selectedAsset.fileSize || selectedAsset.size,
       };
 
-      console.log("📸 Image selected with complete details:", {
-        ...imageData,
+      // For web, always fetch the blob and create a File object
+      console.log("📸 Creating File object for web upload...");
+      try {
+        const response = await fetch(selectedAsset.uri);
+        const blob = await response.blob();
+        const file = new File([blob], imageData.name, { type: mimeType });
+        imageData.file = file; // Add the File object for web
+
+        console.log("📸 ✅ File object created successfully:", {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          instanceof: file instanceof File,
+        });
+      } catch (error) {
+        console.error("📸 ❌ Error creating File object:", error);
+        alert("Error preparing image for upload. Please try again.");
+        return;
+      }
+
+      console.log("📸 Final image data:", {
+        hasUri: !!imageData.uri,
+        hasFile: !!imageData.file,
+        fileName: imageData.name,
+        fileType: imageData.type,
         sizeInKB: imageData.fileSize
           ? Math.round(imageData.fileSize / 1024)
           : "Unknown",

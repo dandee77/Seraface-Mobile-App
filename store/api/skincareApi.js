@@ -34,32 +34,42 @@ export const skincareApi = createApi({
       },
     }),
 
-    // Phase 2: Image Analysis (EXISTING - DON'T CHANGE)
+    // Phase 2: Image Analysis (WEB ONLY)
     submitImageAnalysis: builder.mutation({
       query: ({ imageFile, sessionId }) => {
-        console.log("📸 Preparing image analysis request:", {
+        console.log("📸 Preparing image analysis request for WEB:", {
           sessionId,
           imageFile: {
             uri: imageFile.uri,
             type: imageFile.type,
             name: imageFile.name,
             size: imageFile.fileSize,
+            hasFileObject: !!imageFile.file,
           },
         });
 
         const formData = new FormData();
 
-        formData.append("file", {
-          uri: imageFile.uri,
-          type: imageFile.type || "image/jpeg",
-          name: imageFile.name || `face_image_${Date.now()}.jpg`,
-        });
+        // Web-only approach: Use the File object that was created in ImagePreview
+        if (imageFile.file && imageFile.file instanceof File) {
+          console.log("📸 Using File object for upload:", {
+            name: imageFile.file.name,
+            type: imageFile.file.type,
+            size: imageFile.file.size,
+          });
 
-        console.log("📸 FormData created with file:", {
-          fileName: imageFile.name || `face_image_${Date.now()}.jpg`,
-          fileType: imageFile.type || "image/jpeg",
-          fileUri: imageFile.uri,
-        });
+          formData.append("file", imageFile.file);
+        } else {
+          console.error(
+            "📸 ERROR: No valid File object found in imageFile.file"
+          );
+          throw new Error("No valid file object for upload");
+        }
+
+        // Log FormData contents
+        for (let [key, value] of formData.entries()) {
+          console.log(`📸 FormData entry: ${key}`, value);
+        }
 
         return {
           url: `/api/v1/skincare/phase2/image-analysis?session_id=${encodeURIComponent(sessionId)}`,

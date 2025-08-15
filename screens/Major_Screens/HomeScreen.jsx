@@ -1,4 +1,4 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, ScrollView } from "react-native";
 import { Glasses, Sparkle, Sparkles } from "lucide-react-native";
 import Animated, {
   useAnimatedStyle,
@@ -62,7 +62,11 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <View className="flex-col px-8 py-6">
+    <ScrollView
+      className="flex-1 px-8 py-6"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
       <View className="items-center justify-center w-full my-3">
         <Animated.View
           className="rounded-full overflow-hidden"
@@ -89,23 +93,24 @@ export default function HomeScreen({ navigation }) {
         </Text>
       </View>
 
-      <FlatList
-        className="my-3"
-        data={infoData}
-        renderItem={({ item }) => (
+      <View className="my-3">
+        {infoData.map((item) => (
           <InfoContainer
             key={item.id}
             icon={item.icon}
             title={item.title}
             description={item.description}
           />
-        )}
-      />
-      <NextButton
-        text={"Get Started"}
-        icon={"arrow-forward-outline"}
-        onPress={handleNextButtonPressed}
-      />
-    </View>
+        ))}
+      </View>
+
+      <View className="mt-auto mb-4">
+        <NextButton
+          text={"Get Started"}
+          icon={"arrow-forward-outline"}
+          onPress={handleNextButtonPressed}
+        />
+      </View>
+    </ScrollView>
   );
 }

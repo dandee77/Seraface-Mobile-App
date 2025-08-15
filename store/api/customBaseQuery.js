@@ -3,9 +3,10 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Dynamic base URL based on environment
 const getBaseUrl = () => {
   if (__DEV__) {
-    return "http://192.168.1.5:8000";
+    // return "http://192.168.1.205:8081";
+    return "https://thoroughly-useful-killdeer.ngrok-free.app";
   } else {
-    return "https://your-production-api.com";
+    return "https://thoroughly-useful-killdeer.ngrok-free.app";
   }
 };
 
@@ -17,6 +18,9 @@ const baseQuery = fetchBaseQuery({
     if (sessionId) {
       headers.set("X-Session-ID", sessionId);
     }
+
+    // Add ngrok headers to bypass browser warning
+    headers.set("ngrok-skip-browser-warning", "true");
 
     // IMPORTANT: Never set Content-Type for FormData requests
     // The browser will automatically set it with the correct boundary
