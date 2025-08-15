@@ -1,3 +1,13 @@
+// import { Text, View } from 'react-native';
+
+// export default function App() {
+//   return (
+//     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+//       <Text>Hello World - App is Working!</Text>
+//     </View>
+//   );
+// }
+
 import "./global.css";
 import { StatusBar } from "expo-status-bar";
 import { Pressable } from "react-native";
@@ -27,6 +37,34 @@ import Colors from "./constants/colors";
 import TabBarLabel from "./components/UI_Common/Commons/TabBarLabel";
 import CommunityScreen from "./screens/Major_Screens/CommunityScreen";
 import ChatFAB from "./components/UI_Common/Commons/ChatFAB";
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('App Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Something went wrong. Please restart the app.</Text>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -212,19 +250,6 @@ function AppNavigator() {
           }}
         />
         <Tab.Screen
-          name="Routine"
-          component={RoutinesScreen}
-          options={{
-            headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
-            tabBarIcon: ({ focused }) => (
-              <GradientIcon name={"time"} size={28} focused={focused} />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <TabBarLabel text={"Routine"} focused={focused} />
-            ),
-          }}
-        />
-        <Tab.Screen
           name="Budget"
           component={BudgetScreen}
           options={{
@@ -237,6 +262,20 @@ function AppNavigator() {
             ),
           }}
         />
+        <Tab.Screen
+          name="Routine"
+          component={RoutinesScreen}
+          options={{
+            headerTitle: () => <GradientHeaderTitle title={"Your Routine"} />,
+            tabBarIcon: ({ focused }) => (
+              <GradientIcon name={"time"} size={28} focused={focused} />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <TabBarLabel text={"Routine"} focused={focused} />
+            ),
+          }}
+        />
+        
       </Tab.Navigator>
     </NavigationContainer>
   );
@@ -244,15 +283,17 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaProvider>
-            <StatusBar style="dark" />
-            <AppNavigator />
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
-      </PersistGate>
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+              <StatusBar style="dark" />
+              <AppNavigator />
+            </SafeAreaProvider>
+          </GestureHandlerRootView>
+        </PersistGate>
+      </Provider>
+    </ErrorBoundary>
   );
 }

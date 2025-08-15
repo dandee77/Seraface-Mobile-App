@@ -3,10 +3,9 @@ import {
   ScrollView,
   Text,
   ActivityIndicator,
-  TouchableOpacity,
   Alert,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import TitleContainer from "../../components/UI_Common/Commons/TitleContainer";
 import RoutineItem from "../../components/Routines_Screen/RoutineItem";
@@ -200,27 +199,92 @@ const fallbackEveningRoutine = [
 ];
 
 export default function RoutinesScreen({ navigation, route }) {
+  // ✅ STEP 1: ALL HOOKS MUST BE AT THE VERY TOP - NO EXCEPTIONS
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
-
-  // ✅ CORRECT: ALL HOOKS AT THE TOP
+  
+  // All useState hooks
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [morningRoutine, setMorningRoutine] = useState([]);
   const [eveningRoutine, setEveningRoutine] = useState([]);
   const [asNeededRoutine, setAsNeededRoutine] = useState([]);
 
-  // Get session ID
-  const sessionId =
-    route.params?.sessionId || useSelector((state) => state.auth.sessionId);
-
-  // Get routine data from Redux store
+  // All useSelector hooks
+  const sessionId = useSelector((state) => {
+    return route.params?.sessionId || state.auth.sessionId;
+  });
   const routineData = useSelector((state) => state.skincare.routines);
 
-  // RTK Query hook for routine creation
-  const [getRoutineCreation, { isLoading, error: routineError }] =
-    useGetRoutineCreationMutation();
+  // RTK Query hook
+  const [getRoutineCreation, { isLoading, error: routineError }] = useGetRoutineCreationMutation();
 
-  // ALL useEffect hooks here
+  // ✅ STEP 2: ALL useCallback AND useMemo HOOKS
+  const handleRetryRoutine = useCallback(async () => {
+    if (sessionId) {
+      console.log("🔄 Retrying routine creation with session:", sessionId);
+      try {
+        await getRoutineCreation(sessionId).unwrap();
+      } catch (error) {
+        console.error("❌ Retry failed:", error);
+      }
+    } else {
+      Alert.alert(
+        "Session ID Missing",
+        "Cannot fetch routine without a valid session ID."
+      );
+    }
+  }, [sessionId, getRoutineCreation]);
+
+  const handleIndexChange = useCallback((index) => {
+    setSelectedIndex(index);
+  }, []);
+
+  const handleNextButtonPress = useCallback(() => {
+    navigation.navigate("Home");
+  }, [navigation]);
+
+  // Memoized computed values
+  const routineConfig = useMemo(() => {
+    let selectedRoutine = morningRoutine;
+    let routineTitle = "Morning Routine";
+    let routineDescription = "Your daily morning skincare routine";
+
+    if (selectedIndex === 1) {
+      selectedRoutine = eveningRoutine;
+      routineTitle = "Evening Routine";
+      routineDescription = "Your nightly skincare regimen";
+    } else if (selectedIndex === 2) {
+      selectedRoutine = asNeededRoutine;
+      routineTitle = "As Needed";
+      routineDescription = "Products to use as needed for specific concerns";
+    }
+
+    return {
+      selectedRoutine,
+      routineTitle,
+      routineDescription,
+    };
+  }, [selectedIndex, morningRoutine, eveningRoutine, asNeededRoutine]);
+
+  const hasNoRoutines = useMemo(() => {
+    return (
+      morningRoutine.length === 0 &&
+      eveningRoutine.length === 0 &&
+      asNeededRoutine.length === 0
+    );
+  }, [morningRoutine.length, eveningRoutine.length, asNeededRoutine.length]);
+
+  const segmentedControlOptions = useMemo(() => [
+    { label: "Morning", icon: "sunny" },
+    { label: "Evening", icon: "moon" },
+    {
+      label: "As Needed",
+      icon: "bandage",
+      disabled: asNeededRoutine.length === 0,
+    },
+  ], [asNeededRoutine.length]);
+
+  // ✅ STEP 3: ALL useEffect HOOKS
   useEffect(() => {
     // Process routine data from backend
     if (routineData && routineData.routine && routineData.routine.length > 0) {
@@ -283,212 +347,166 @@ export default function RoutinesScreen({ navigation, route }) {
     }
   }, [routineData]);
 
-  // Handle retry for routine creation
-  const handleRetryRoutine = async () => {
-    if (sessionId) {
-      console.log("🔄 Retrying routine creation with session:", sessionId);
-      try {
-        await getRoutineCreation(sessionId).unwrap();
-      } catch (error) {
-        console.error("❌ Retry failed:", error);
-      }
-    } else {
-      Alert.alert(
-        "Session ID Missing",
-        "Cannot fetch routine without a valid session ID."
-      );
-    }
+  // ✅ STEP 4: RENDER FUNCTIONS (AFTER ALL HOOKS)
+  const renderLoadingState = () => (
+    <View className="flex-1 items-center justify-center px-8">
+      <ActivityIndicator size="large" color={Colors.primary500} />
+      <Text className="text-lg font-medium mt-6 mb-2 text-center">
+        Creating Your Personalized Routine
+      </Text>
+      <Text className="text-textSecondary text-center mb-6">
+        Please wait while we analyze your skin profile and create a custom
+        routine tailored to your needs.
+      </Text>
+    </View>
+  );
+
+  const renderErrorState = () => (
+    <View className="flex-1 items-center justify-center px-8">
+      <View className="bg-error-100 p-12 rounded-3xl items-center mb-8">
+        <Ionicons name="warning-outline" size={60} color={Colors.error500} />
+      </View>
+      <Text className="text-lg font-medium mb-2 text-center">
+        Failed to Create Routine
+      </Text>
+      <Text className="text-textSecondary text-center mb-6">
+        {routineError?.message ||
+          "Unable to create a personalized routine at this time. Please try again."}
+      </Text>
+      <NextButton
+        text="Retry"
+        icon="refresh-outline"
+        onPress={handleRetryRoutine}
+      />
+      <NextButton
+        text="Back to Recommendations"
+        icon="arrow-back-outline"
+        onPress={() => navigation.goBack()}
+      />
+    </View>
+  );
+
+  const renderNoRoutinesState = () => (
+    <ScrollView className="flex-1">
+      <View className="px-8 py-6 gap-4">
+        <TitleContainer title={"Your Skincare Routine"} />
+        <View className="items-center justify-center py-8">
+          <View className="bg-primary-100 p-8 rounded-3xl items-center mb-4">
+            <Ionicons
+              name="flask-outline"
+              size={60}
+              color={Colors.primary500}
+            />
+          </View>
+          <Text className="text-lg font-medium mb-2 text-center">
+            No Routine Generated Yet
+          </Text>
+          <Text className="text-textSecondary text-center mb-6">
+            We couldn't find suitable products for your routine based on your
+            profile. This may happen if you have specific constraints or
+            allergies.
+          </Text>
+          <NextButton
+            text="Retry Routine Creation"
+            icon="refresh-outline"
+            onPress={handleRetryRoutine}
+          />
+        </View>
+      </View>
+    </ScrollView>
+  );
+
+  const renderRoutineContent = () => {
+    const { selectedRoutine } = routineConfig;
+    
+    return (
+      <View className="gap-0">
+        {selectedRoutine.length > 0 ? (
+          selectedRoutine.map((item, index) => (
+            <RoutineItem
+              key={`${selectedIndex}-${index}`}
+              {...item}
+              showDetails={index === 0}
+            />
+          ))
+        ) : (
+          <View className="bg-white p-6 rounded-xl items-center">
+            <Ionicons
+              name="calendar-outline"
+              size={40}
+              color={Colors.textSecondary}
+            />
+            <Text className="text-center text-textSecondary mt-4">
+              No{" "}
+              {selectedIndex === 0
+                ? "morning"
+                : selectedIndex === 1
+                  ? "evening"
+                  : "as needed"}{" "}
+              routine items found.
+            </Text>
+          </View>
+        )}
+      </View>
+    );
   };
 
-  function handleIndexChange(index) {
-    setSelectedIndex(index);
-  }
-
-  function handleNextButtonPress() {
-    navigation.navigate("Budget");
-  }
-
-  // Get data for the selected tab
-  let selectedRoutine = morningRoutine;
-  let routineTitle = "Morning Routine";
-
-  if (selectedIndex === 1) {
-    selectedRoutine = eveningRoutine;
-    routineTitle = "Evening Routine";
-  } else if (selectedIndex === 2) {
-    selectedRoutine = asNeededRoutine;
-    routineTitle = "As Needed";
-  }
-
-  // If no routine items in any category
-  const hasNoRoutines =
-    morningRoutine.length === 0 &&
-    eveningRoutine.length === 0 &&
-    asNeededRoutine.length === 0;
-
-  // ✅ CORRECT: ALL CONDITIONAL RENDERING AFTER ALL HOOKS
-  // Loading state
-  if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center px-8">
-        <ActivityIndicator size="large" color={Colors.primary500} />
-        <Text className="text-lg font-medium mt-6 mb-2 text-center">
-          Creating Your Personalized Routine
-        </Text>
-        <Text className="text-textSecondary text-center mb-6">
-          Please wait while we analyze your skin profile and create a custom
-          routine tailored to your needs.
-        </Text>
-      </View>
-    );
-  }
-
-  // Error state
-  if (routineError) {
-    return (
-      <View className="flex-1 items-center justify-center px-8">
-        <View className="bg-error-100 p-12 rounded-3xl items-center mb-8">
-          <Ionicons name="warning-outline" size={60} color={Colors.error500} />
-        </View>
-        <Text className="text-lg font-medium mb-2 text-center">
-          Failed to Create Routine
-        </Text>
-        <Text className="text-textSecondary text-center mb-6">
-          {routineError?.message ||
-            "Unable to create a personalized routine at this time. Please try again."}
-        </Text>
-        <NextButton
-          text="Retry"
-          icon="refresh-outline"
-          onPress={handleRetryRoutine}
-        />
-        <NextButton
-          text="Back to Recommendations"
-          icon="arrow-back-outline"
-          onPress={() => navigation.goBack()}
-        />
-      </View>
-    );
-  }
-
-  if (hasNoRoutines) {
+  const renderMainContent = () => {
+    const { routineTitle, routineDescription } = routineConfig;
+    
     return (
       <ScrollView className="flex-1">
         <View className="px-8 py-6 gap-4">
           <TitleContainer title={"Your Skincare Routine"} />
 
-          <View className="items-center justify-center py-8">
-            <View className="bg-primary-100 p-8 rounded-3xl items-center mb-4">
-              <Ionicons
-                name="flask-outline"
-                size={60}
-                color={Colors.primary500}
-              />
-            </View>
-            <Text className="text-lg font-medium mb-2 text-center">
-              No Routine Generated Yet
+          <SegmentedControl
+            selectedIndex={selectedIndex}
+            onChange={handleIndexChange}
+            options={segmentedControlOptions}
+          />
+
+          <View className="mb-2">
+            <Text className="text-lg font-bold text-primary-700">
+              {routineTitle}
             </Text>
-            <Text className="text-textSecondary text-center mb-6">
-              We couldn't find suitable products for your routine based on your
-              profile. This may happen if you have specific constraints or
-              allergies.
+            <Text className="text-sm text-textSecondary mt-1">
+              {routineDescription}
             </Text>
-            <NextButton
-              text="Retry Routine Creation"
-              icon="refresh-outline"
-              onPress={handleRetryRoutine}
-            />
           </View>
-        </View>
-      </ScrollView>
-    );
-  }
 
-  // Default view with tabs and routines
-  return (
-    <ScrollView className="flex-1">
-      <View className="px-8 py-6 gap-4">
-        <TitleContainer title={"Your Skincare Routine"} />
+          {renderRoutineContent()}
 
-        <SegmentedControl
-          selectedIndex={selectedIndex}
-          onChange={handleIndexChange}
-          options={[
-            { label: "Morning", icon: "sunny" },
-            { label: "Evening", icon: "moon" },
-            {
-              label: "As Needed",
-              icon: "bandage",
-              disabled: asNeededRoutine.length === 0,
-            },
-          ]}
-        />
-
-        <View className="mb-2">
-          <Text className="text-lg font-bold text-primary-700">
-            {routineTitle}
-          </Text>
-          {selectedIndex === 0 && (
-            <Text className="text-sm text-textSecondary mt-1">
-              Your daily morning skincare routine
-            </Text>
-          )}
-          {selectedIndex === 1 && (
-            <Text className="text-sm text-textSecondary mt-1">
-              Your nightly skincare regimen
-            </Text>
-          )}
-          {selectedIndex === 2 && (
-            <Text className="text-sm text-textSecondary mt-1">
-              Products to use as needed for specific concerns
-            </Text>
-          )}
-        </View>
-
-        <View className="gap-0">
-          {selectedRoutine.length > 0 ? (
-            selectedRoutine.map((item, index) => (
-              <RoutineItem
-                key={`${selectedIndex}-${index}`}
-                {...item}
-                showDetails={index === 0}
-              />
-            ))
-          ) : (
-            <View className="bg-white p-6 rounded-xl items-center">
-              <Ionicons
-                name="calendar-outline"
-                size={40}
-                color={Colors.textSecondary}
-              />
-              <Text className="text-center text-textSecondary mt-4">
-                No{" "}
-                {selectedIndex === 0
-                  ? "morning"
-                  : selectedIndex === 1
-                    ? "evening"
-                    : "as needed"}{" "}
-                routine items found.
+          {routineData?.product_type === "custom" && (
+            <View className="bg-primary-50 rounded-xl p-4 mt-4">
+              <Text className="text-center text-primary-700">
+                <Ionicons name="information-circle" size={16} /> This is a
+                personalized routine based on your skin analysis.
               </Text>
             </View>
           )}
+
+          <NextButton
+            text={"Complete Analysis"}
+            onPress={handleNextButtonPress}
+            icon={"checkmark-circle-outline"}
+          />
         </View>
+      </ScrollView>
+    );
+  };
 
-        {routineData?.product_type === "custom" && (
-          <View className="bg-primary-50 rounded-xl p-4 mt-4">
-            <Text className="text-center text-primary-700">
-              <Ionicons name="information-circle" size={16} /> This is a
-              personalized routine based on your skin analysis.
-            </Text>
-          </View>
-        )}
+  // ✅ STEP 5: CONDITIONAL RENDERING LOGIC (NO HOOKS INSIDE)
+  if (isLoading) {
+    return renderLoadingState();
+  }
 
-        <NextButton
-          text={"Complete Analysis"}
-          onPress={() => navigation.navigate("Home")}
-          icon={"checkmark-circle-outline"}
-        />
-      </View>
-    </ScrollView>
-  );
+  if (routineError) {
+    return renderErrorState();
+  }
+
+  if (hasNoRoutines) {
+    return renderNoRoutinesState();
+  }
+
+  return renderMainContent();
 }

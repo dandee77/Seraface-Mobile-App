@@ -8,8 +8,12 @@ import { skincareApi } from "./api/skincareApi";
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
+  transforms: [],
   whitelist: ["auth", "skincare"], // Only persist auth and skincare data
   blacklist: ["skincareApi"], // Don't persist API cache
+  timeout: 10000,
+  serialize: true,
+  deserialize: true,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
