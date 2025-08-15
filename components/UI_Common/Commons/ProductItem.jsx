@@ -1,5 +1,6 @@
 import { View, Text, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import Colors from "../../../constants/colors";
 import { GradientView } from "../Gradients/GradientView";
 import { useNavigation } from "@react-navigation/native";
@@ -13,9 +14,66 @@ export default function ProductItem({
   priorityLevel,
   image,
   onProductClick,
-  productData, // Add this prop for full product data
+  productData, // Full backend product data
 }) {
   const navigation = useNavigation();
+  const [imageError, setImageError] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Get all possible image URLs from backend data
+  const getAllImageUrls = () => {
+    const urls = [];
+
+    // Primary sources
+    if (productData?.thumbnail) urls.push(productData.thumbnail);
+    if (productData?.product_data?.thumbnail)
+      urls.push(productData.product_data.thumbnail);
+
+    // Media sources
+    if (productData?.media) {
+      productData.media.forEach((media) => {
+        if (media.link) urls.push(media.link);
+      });
+    }
+    if (productData?.product_data?.media) {
+      productData.product_data.media.forEach((media) => {
+        if (media.link) urls.push(media.link);
+      });
+    }
+
+    // Fallback
+    if (image) urls.push(image);
+
+    // Final fallback
+    urls.push(
+      "https://via.placeholder.com/150x150/E5E7EB/9CA3AF?text=No+Image"
+    );
+
+    return urls;
+  };
+
+  // Get the current image URL to try
+  const getCurrentImageUrl = () => {
+    const urls = getAllImageUrls();
+    return urls[currentImageIndex] || urls[urls.length - 1];
+  };
+
+  // Extract product title from backend data
+  const getProductTitle = () => {
+    if (productData?.title) return productData.title;
+    if (productData?.product_data?.title) return productData.product_data.title;
+    return title || "Product Name";
+  };
+
+  // Extract price from backend data
+  const getProductPrice = () => {
+    if (productData?.price) return productData.price.replace("₱", "");
+    if (productData?.extracted_price)
+      return productData.extracted_price.toString();
+    if (productData?.product_data?.price)
+      return productData.product_data.price.replace("₱", "");
+    return price?.toString() || "0";
+  };
 
   const handleProductPress = () => {
     if (onProductClick) {
@@ -25,15 +83,15 @@ export default function ProductItem({
       navigation.navigate("Product", {
         productData: productData || {
           product_data: {
-            title,
-            price: `₱${price}`,
-            thumbnail: image,
+            title: getProductTitle(),
+            price: `₱${getProductPrice()}`,
+            thumbnail: getProductImage(),
             rating: 4.5,
             reviews: 100,
             store: "Online Store",
             product_link: "https://example.com",
             detailed_description: description,
-            media: [{ type: "image", link: image }],
+            media: [{ type: "image", link: getProductImage() }],
           },
           recommendation_context: {
             category: subtitle?.toLowerCase() || "skincare",
@@ -50,53 +108,132 @@ export default function ProductItem({
   };
 
   return (
-    <View className="my-3 overflow-hidden bg-background rounded-2xl relative">
+    <View className="my-2 mx-1 overflow-hidden bg-background rounded-2xl relative shadow-sm">
       <Pressable
         onPress={handleProductPress}
         android_ripple={{ color: Colors.primary100 }}
-        className="flex-row"
+        className="flex-row min-h-[120px]"
       >
-        <View className="absolute left-0 top-0 bottom-0 w-28">
+        {/* Product Image */}
+        <View className="w-24 h-24 m-3 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
           <Image
-            source={{ uri: image }}
-            className="w-full h-full rounded-tl-2xl rounded-bl-2xl"
+            source={{ uri: getCurrentImageUrl() }}
+            className="w-full h-full"
             resizeMode="cover"
+            onError={(error) => {
+              console.log(
+                `Image ${currentImageIndex} failed:`,
+                getCurrentImageUrl()
+              );
+              console.log("Error details:", error.nativeEvent?.error);
+
+              // Try next image in the list
+              const urls = getAllImageUrls();
+              if (currentImageIndex < urls.length - 1) {
+                setCurrentImageIndex((prev) => prev + 1);
+              } else {
+                setImageError(true);
+              }
+            }}
+            onLoad={() => {
+              console.log(
+                "✅ Image loaded successfully:",
+                getCurrentImageUrl()
+              );
+              setImageError(false);
+            }}
           />
+
+          {imageError && (
+            <View className="absolute inset-0 flex items-center justify-center bg-gray-200">
+              <Ionicons name="image-outline" size={24} color="#9CA3AF" />
+              <Text className="text-xs text-gray-500 mt-1">No Image</Text>
+            </View>
+          )}
         </View>
 
-        <View className="flex-1 px-4 py-4 pl-[110px]">
-          <View className="flex-row justify-between mb-1">
+        {/* Product Info */}
+        <View className="flex-1 p-3 pr-4 justify-between">
+          {/* Title and Match */}
+          <View className="flex-row justify-between items-start mb-2">
             <View className="flex-1 mr-2">
-              <Text className="font-bold text-base">{title}</Text>
-              <Text className="text-xs text-textTertiary">{subtitle}</Text>
-            </View>
-
-            <View className="">
-              <GradientView preset="purpleToPink3" style={{ borderRadius: 18 }}>
-                <View className="flex-row items-center px-2 justify-center">
-                  <Ionicons name="star" size={14} color={Colors.textLight} />
-                  <Text className="text-xs font-medium text-textLight p-1 align-middle">
-                    {matchPercentage}% Match
-                  </Text>
-                </View>
-              </GradientView>
-            </View>
-          </View>
-
-          <View className="mb-2">
-            <Text className="text-sm text-textSecondary" numberOfLines={2}>
-              {description}
-            </Text>
-          </View>
-
-          <View className="flex-row justify-between items-center mt-auto">
-            <View className="flex-row items-end gap-1">
-              <Text className="font-bold text-md">₱{price}</Text>
               <Text
-                className={`text-xs ${priorityLevel ? (priorityLevel == "High" ? "text-highPriority" : "text-mediumPriority") : "text-textSecondary"}  align-bottom`}
+                className="font-bold text-base leading-tight text-gray-900"
+                numberOfLines={2}
+                style={{ fontSize: 16, lineHeight: 20 }}
               >
-                • {priorityLevel} Priority
+                {getProductTitle()}
               </Text>
+              {subtitle && (
+                <Text
+                  className="text-xs text-gray-500 mt-1"
+                  style={{ fontSize: 12 }}
+                >
+                  {subtitle}
+                </Text>
+              )}
+            </View>
+
+            {matchPercentage && (
+              <View className="ml-2">
+                <GradientView
+                  preset="purpleToPink3"
+                  style={{
+                    borderRadius: 12,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                  }}
+                >
+                  <View className="flex-row items-center">
+                    <Ionicons name="star" size={12} color={Colors.textLight} />
+                    <Text
+                      className="text-xs font-medium text-textLight ml-1"
+                      style={{ fontSize: 10 }}
+                    >
+                      {matchPercentage}%
+                    </Text>
+                  </View>
+                </GradientView>
+              </View>
+            )}
+          </View>
+
+          {/* Description */}
+          {description && (
+            <View className="mb-2">
+              <Text
+                className="text-sm text-gray-600 leading-relaxed"
+                numberOfLines={2}
+                style={{ fontSize: 13, lineHeight: 18 }}
+              >
+                {description}
+              </Text>
+            </View>
+          )}
+
+          {/* Price and Priority */}
+          <View className="flex-row justify-between items-center mt-auto">
+            <View className="flex-row items-center">
+              <Text
+                className="font-bold text-gray-900 mr-2"
+                style={{ fontSize: 16 }}
+              >
+                ₱{getProductPrice()}
+              </Text>
+              {priorityLevel && (
+                <Text
+                  className={`text-xs ${
+                    priorityLevel === "High"
+                      ? "text-red-500"
+                      : priorityLevel === "Medium"
+                        ? "text-orange-500"
+                        : "text-gray-500"
+                  }`}
+                  style={{ fontSize: 11 }}
+                >
+                  • {priorityLevel} Priority
+                </Text>
+              )}
             </View>
 
             <Pressable
@@ -104,12 +241,12 @@ export default function ProductItem({
               android_ripple={{
                 color: Colors.primary100,
                 borderless: true,
-                radius: 20,
+                radius: 16,
               }}
             >
               <Ionicons
                 name="add-circle-outline"
-                size={24}
+                size={20}
                 color={Colors.primary500}
               />
             </Pressable>
